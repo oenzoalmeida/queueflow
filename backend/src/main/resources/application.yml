@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/queueflow
+    username: queueflow
+    password: queueflow
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+
+server:
+  port: 8080
+
+app:
+  jwt:
+    # dev-only secret (HS256); override via env JWT_SECRET in any real deployment
+    secret: cXVldWVmbG93LWRldi1vbmx5LXNlY3JldC0zZjliNGQyYS04Y2UxLTRkNWEtYmMyOC00ODM5MWQ4YTdiZWYtdXNlLWVudi1pbi1wcm9kdWN0aW9u
+    expiration-ms: 86400000
+  cors:
+    allowed-origins: http://localhost:5173,http://localhost:4173,http://127.0.0.1:5173,http://127.0.0.1:4173

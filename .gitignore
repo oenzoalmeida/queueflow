@@ -1,0 +1,33 @@
+# Java / Maven
+backend/target/
+*.class
+.mvn/wrapper/maven-wrapper.jar
+
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo
+
+# Env / secrets
+.env
+.env.local
+*.env
+!.env.example
+!*/.env.example
+
+# Local Postgres / portable tooling
+pgdata/
+*.pgdata/
+tools/
+pg.log
+
+# Logs
+*.log
+logs/
+
+# IDE / OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db

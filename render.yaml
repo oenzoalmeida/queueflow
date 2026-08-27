@@ -1,0 +1,30 @@
+# Render Blueprint — provisions the backend web service and its Postgres database.
+# Env vars marked sync:false are entered manually in the Render dashboard (secrets,
+# or values that depend on the database/frontend URLs created alongside this service).
+services:
+  - type: web
+    name: queueflow-backend
+    env: java
+    plan: free
+    buildCommand: ./mvnw clean package -DskipTests
+    startCommand: java -jar target/queueflow-backend-1.0.0.jar
+    healthCheckPath: /api/public/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+
+databases:
+  - name: queueflow-db
+    plan: free
+    databaseName: queueflow
+    user: queueflow
