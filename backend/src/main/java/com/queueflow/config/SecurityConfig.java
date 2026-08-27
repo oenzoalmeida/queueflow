@@ -74,6 +74,7 @@ public class SecurityConfig {
         cfg.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
         cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
+        cfg.setAllowCredentials(true); // SockJS's XHR-based transports send withCredentials for /ws/**
         UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
         src.registerCorsConfiguration("/**", cfg);
         return src;

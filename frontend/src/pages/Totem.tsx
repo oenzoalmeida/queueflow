@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import axios from 'axios'
 import { ArrowLeft, Printer } from 'lucide-react'
+import { api } from '../api/client'
 
 interface PubQueue { id: number; name: string; prefix: string }
 interface Issued {
@@ -11,8 +11,6 @@ interface Issued {
   createdAt: string
 }
 
-const pub = axios.create({ baseURL: '/api/public' })
-
 export default function Totem() {
   const [queues, setQueues] = useState<PubQueue[]>([])
   const [queue, setQueue] = useState<PubQueue | null>(null)
@@ -21,14 +19,14 @@ export default function Totem() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const load = () => pub.get('/queues').then((r) => setQueues(r.data)).catch(() => setError('Falha ao carregar filas.'))
+  const load = () => api.get('/public/queues').then((r) => setQueues(r.data)).catch(() => setError('Falha ao carregar filas.'))
   useEffect(() => { load() }, [])
 
   const confirm = async () => {
     if (!queue) return
     setLoading(true); setError(null)
     try {
-      const { data } = await pub.post('/tickets', {
+      const { data } = await api.post('/public/tickets', {
         queueId: queue.id,
         priorityType: priority ? 'PRIORITY' : 'NORMAL',
       })
