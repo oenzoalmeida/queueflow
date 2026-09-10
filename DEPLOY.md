@@ -7,7 +7,7 @@ Architecture: **Netlify** (frontend) + **Render** (backend + PostgreSQL).
 
 ## 2. Backend Web Service on Render
 1. New → Web Service → connect the repo (or use the included `render.yaml` as a Blueprint: New → Blueprint).
-2. Environment: `Java`. Build command: `./mvnw clean package -DskipTests`. Start command: `java -jar target/queueflow-backend-1.0.0.jar`.
+2. Environment: `Java`. Build command: `bash ./mvnw clean package -DskipTests`. Start command: `java -jar target/queueflow-backend-1.0.0.jar`.
 3. Root directory: `backend`.
 
 ## 3. Configure backend env vars
