@@ -1,36 +1,58 @@
-import React, { createContext, useContext, useState } from 'react'
-import { api, setSession, clearSession, getStoredUser, getToken, errMessage, type LoggedUser } from './api/client'
+import React, { createContext, useContext, useEffect, useState } from 'react'
+import { api, errMessage, type LoggedUser } from './api/client'
 
 interface AuthCtx {
   user: LoggedUser | null
+  loading: boolean
   login: (email: string, password: string) => Promise<LoggedUser>
-  logout: () => void
+  logout: () => Promise<void>
 }
 
 const Ctx = createContext<AuthCtx>(null!)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<LoggedUser | null>(() => (getToken() ? getStoredUser() : null))
+  const [user, setUser] = useState<LoggedUser | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+    api
+      .get<LoggedUser>('/auth/me')
+      .then(({ data }) => {
+        if (active) setUser(data)
+      })
+      .catch(() => {
+        if (active) setUser(null)
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [])
 
   const login = async (email: string, password: string) => {
     try {
-      const { data } = await api.post('/auth/login', { email, password })
-      const u: LoggedUser = { id: data.id, name: data.name, email: data.email, role: data.role }
-      setSession(data.token, u)
-      setUser(u)
-      return u
+      const { data } = await api.post<LoggedUser>('/auth/login', { email, password })
+      setUser(data)
+      return data
     } catch (e) {
       throw new Error(errMessage(e))
     }
   }
 
-  const logout = () => {
-    clearSession()
-    setUser(null)
-    window.location.href = '/login'
+  const logout = async () => {
+    try {
+      await api.post('/auth/logout')
+    } finally {
+      setUser(null)
+      window.location.href = '/login'
+    }
   }
 
-  return <Ctx.Provider value={{ user, login, logout }}>{children}</Ctx.Provider>
+  return <Ctx.Provider value={{ user, loading, login, logout }}>{children}</Ctx.Provider>
 }
 
 export const useAuth = () => useContext(Ctx)
