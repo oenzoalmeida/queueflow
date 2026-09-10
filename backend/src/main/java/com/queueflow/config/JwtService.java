@@ -28,6 +28,10 @@ public class JwtService {
                 .signWith(key).compact();
     }
 
+    public long expirationMs() {
+        return expirationMs;
+    }
+
     /** Returns claims or null when invalid/expired. */
     public Claims parse(String token) {
         try {
