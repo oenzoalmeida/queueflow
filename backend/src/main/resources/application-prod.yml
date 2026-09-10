@@ -25,3 +25,11 @@ app:
     cookie-same-site: None
   cors:
     allowed-origins: ${FRONTEND_URL}
+
+queueflow:
+  bootstrap:
+    enabled: ${QUEUEFLOW_BOOTSTRAP_ENABLED:false}
+    admin-email: ${QUEUEFLOW_BOOTSTRAP_ADMIN_EMAIL:}
+    admin-password: ${QUEUEFLOW_BOOTSTRAP_ADMIN_PASSWORD:}
+    attendant-email: ${QUEUEFLOW_BOOTSTRAP_ATTENDANT_EMAIL:}
+    attendant-password: ${QUEUEFLOW_BOOTSTRAP_ATTENDANT_PASSWORD:}
