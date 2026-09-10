@@ -1,0 +1,11 @@
+.git
+.github
+.claude
+**/.env
+**/.env.*
+**/node_modules
+**/dist
+**/target
+**/*.log
+.DS_Store
+Thumbs.db
