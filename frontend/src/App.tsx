@@ -13,17 +13,18 @@ import Display from './pages/Display'
 import AdminLayout from './components/AdminLayout'
 
 function RequireRole({ role, children }: { role: 'ADMIN' | 'ATTENDANT' | 'ANY'; children: React.ReactNode }) {
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
+  if (loading) return <div className="page-loading">Carregando…</div>
   if (!user) return <Navigate to="/login" replace />
   if (role === 'ADMIN' && user.role !== 'ADMIN') return <Navigate to="/attendant" replace />
   return <>{children}</>
 }
 
 export default function App() {
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
   return (
     <Routes>
-      <Route path="/" element={<Navigate to={user?.role === 'ATTENDANT' ? '/attendant' : user ? '/dashboard' : '/login'} replace />} />
+      <Route path="/" element={loading ? <div className="page-loading">Carregando…</div> : <Navigate to={user?.role === 'ATTENDANT' ? '/attendant' : user ? '/dashboard' : '/login'} replace />} />
       <Route path="/login" element={<Login />} />
 
       <Route element={<RequireRole role="ADMIN"><AdminLayout /></RequireRole>}>
