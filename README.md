@@ -2,11 +2,25 @@
 
 Sistema full stack para gerenciamento de filas de atendimento em tempo real, com painel de acompanhamento, autenticação e atualização instantânea dos atendimentos.
 
+## Demonstração
+
+[Acessar o QueueFlow online](https://queueflow-frontend.onrender.com)
+
+> Para uso normal, compartilhe apenas o link acima. O backend é um serviço técnico utilizado pelo frontend.
+
 ## Sobre o projeto
 
 O QueueFlow foi desenvolvido para organizar o fluxo de atendimento de estabelecimentos, permitindo controlar senhas, guichês e o andamento da fila por meio de uma aplicação web.
 
 O projeto utiliza uma arquitetura separada entre frontend e backend, com comunicação em tempo real via WebSocket.
+
+## Perfis de acesso
+
+- **Administrador (ADMIN):** acesso ao painel administrativo e à configuração da operação.
+- **Atendente (ATTENDANT):** acesso à tela operacional de atendimento.
+- **Totem e Display:** rotas públicas para emissão e exibição de senhas, sem necessidade de login.
+
+As credenciais de demonstração são mantidas fora do repositório e provisionadas por configuração segura do ambiente de produção.
 
 ## Principais recursos
 
@@ -48,7 +62,6 @@ O projeto utiliza uma arquitetura separada entre frontend e backend, com comunic
 - Docker
 - Docker Compose
 - Render
-- Netlify
 
 ## Estrutura do projeto
 
