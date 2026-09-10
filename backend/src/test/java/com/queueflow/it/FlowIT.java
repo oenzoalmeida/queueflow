@@ -35,21 +35,28 @@ class FlowIT {
     @Autowired JdbcTemplate jdbc;
     final ObjectMapper mapper = new ObjectMapper();
 
-    static String adminToken, att1Token, att2Token;
+    static String adminSession, att1Session, att2Session;
     static Long queueAId, queueBId, counter1Id, counter2Id, att2UserId;
 
-    ResponseEntity<JsonNode> post(String path, Object body, String token) {
-        return exchange(HttpMethod.POST, path, body, token);
+    ResponseEntity<JsonNode> post(String path, Object body, String session) {
+        return exchange(HttpMethod.POST, path, body, session);
     }
 
-    ResponseEntity<JsonNode> exchange(HttpMethod method, String path, Object body, String token) {
+    ResponseEntity<JsonNode> exchange(HttpMethod method, String path, Object body, String session) {
         HttpHeaders h = new HttpHeaders();
         h.setContentType(MediaType.APPLICATION_JSON);
-        if (token != null) h.setBearerAuth(token);
+        if (session != null) h.add(HttpHeaders.COOKIE, session);
         return rest.exchange(path, method, new HttpEntity<>(body, h), JsonNode.class);
     }
 
     JsonNode body(ResponseEntity<JsonNode> r) { return r.getBody(); }
+
+    String sessionCookie(ResponseEntity<?> response) {
+        String setCookie = response.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
+        assertNotNull(setCookie, "authentication response must set a session cookie");
+        assertTrue(setCookie.contains("HttpOnly"), "session cookie must be HttpOnly");
+        return setCookie.split(";", 2)[0];
+    }
 
     @Test
     @Order(1)
@@ -58,20 +65,27 @@ class FlowIT {
                 Map.of("name", "Admin", "email", "admin@test.io", "password", "Secret1!"), null);
         assertEquals(HttpStatus.OK, reg1.getStatusCode());
         assertEquals("ADMIN", body(reg1).path("role").asText());
-        adminToken = body(reg1).path("token").asText();
+        assertFalse(body(reg1).has("token"));
+        adminSession = sessionCookie(reg1);
 
         var reg2 = post("/api/auth/register",
                 Map.of("name", "Atendente 1", "email", "att1@test.io", "password", "Secret1!"), null);
         assertEquals("ATTENDANT", body(reg2).path("role").asText());
-        att1Token = body(reg2).path("token").asText();
+        att1Session = sessionCookie(reg2);
 
         var reg3 = post("/api/auth/register",
                 Map.of("name", "Atendente 2", "email", "att2@test.io", "password", "Secret1!"), null);
-        att2Token = body(reg3).path("token").asText();
+        att2Session = sessionCookie(reg3);
         att2UserId = body(reg3).path("id").asLong();
 
         var login = post("/api/auth/login", Map.of("email", "admin@test.io", "password", "Secret1!"), null);
         assertEquals(HttpStatus.OK, login.getStatusCode());
+        assertFalse(body(login).has("token"));
+        assertNotNull(sessionCookie(login));
+
+        var me = exchange(HttpMethod.GET, "/api/auth/me", null, adminSession);
+        assertEquals(HttpStatus.OK, me.getStatusCode());
+        assertEquals("ADMIN", body(me).path("role").asText());
 
         var bad = post("/api/auth/login", Map.of("email", "admin@test.io", "password", "wrong"), null);
         assertEquals(HttpStatus.UNAUTHORIZED, bad.getStatusCode());
@@ -81,31 +95,29 @@ class FlowIT {
     @Order(2)
     void adminEndpoints_rolesAndDuplicates() {
         assertEquals(HttpStatus.FORBIDDEN,
-                post("/api/queues", Map.of("name", "X", "prefix", "X"), att1Token).getStatusCode());
+                post("/api/queues", Map.of("name", "X", "prefix", "X"), att1Session).getStatusCode());
 
-        var qA = post("/api/queues", Map.of("name", "Fila A", "prefix", "A"), adminToken);
+        var qA = post("/api/queues", Map.of("name", "Fila A", "prefix", "A"), adminSession);
         assertEquals(HttpStatus.OK, qA.getStatusCode());
         queueAId = body(qA).path("id").asLong();
 
-        var c1 = post("/api/counters", Map.of("name", "Guichê 01"), adminToken);
-        var c2 = post("/api/counters", Map.of("name", "Guichê 02"), adminToken);
+        var c1 = post("/api/counters", Map.of("name", "Guichê 01"), adminSession);
+        var c2 = post("/api/counters", Map.of("name", "Guichê 02"), adminSession);
         assertEquals(HttpStatus.OK, c1.getStatusCode());
         counter1Id = body(c1).path("id").asLong();
         counter2Id = body(c2).path("id").asLong();
 
-        assertEquals(HttpStatus.CONFLICT, post("/api/queues", Map.of("name", "Outra", "prefix", "A"), adminToken).getStatusCode());
-        assertEquals(HttpStatus.CONFLICT, post("/api/counters", Map.of("name", "Guichê 01"), adminToken).getStatusCode());
+        assertEquals(HttpStatus.CONFLICT, post("/api/queues", Map.of("name", "Outra", "prefix", "A"), adminSession).getStatusCode());
+        assertEquals(HttpStatus.CONFLICT, post("/api/counters", Map.of("name", "Guichê 01"), adminSession).getStatusCode());
 
-        assertEquals(HttpStatus.OK, post("/api/counters/" + counter1Id + "/claim", Map.of(), att1Token).getStatusCode());
-        assertEquals(HttpStatus.OK, post("/api/counters/" + counter2Id + "/claim", Map.of(), att2Token).getStatusCode());
-        // second attendant cannot steal counter 1
-        assertEquals(HttpStatus.CONFLICT, post("/api/counters/" + counter1Id + "/claim", Map.of(), att2Token).getStatusCode());
+        assertEquals(HttpStatus.OK, post("/api/counters/" + counter1Id + "/claim", Map.of(), att1Session).getStatusCode());
+        assertEquals(HttpStatus.OK, post("/api/counters/" + counter2Id + "/claim", Map.of(), att2Session).getStatusCode());
+        assertEquals(HttpStatus.CONFLICT, post("/api/counters/" + counter1Id + "/claim", Map.of(), att2Session).getStatusCode());
     }
 
     @Test
     @Order(3)
     void sequentialIssuance_andPriorityPattern() {
-        // 4 normals + 2 priorities
         for (int i = 0; i < 4; i++)
             post("/api/public/tickets", Map.of("queueId", queueAId, "priorityType", "NORMAL"), null);
         for (int i = 0; i < 2; i++)
@@ -113,53 +125,44 @@ class FlowIT {
 
         List<String> order = new ArrayList<>();
         for (int i = 0; i < 6; i++) {
-            var called = post("/api/tickets/call-next", Map.of("counterId", counter1Id), att1Token);
+            var called = post("/api/tickets/call-next", Map.of("counterId", counter1Id), att1Session);
             assertEquals(HttpStatus.OK, called.getStatusCode());
             order.add(body(called).path("displayCode").asText());
-            assertEquals(HttpStatus.OK, post("/api/tickets/start", Map.of("counterId", counter1Id), att1Token).getStatusCode());
-            assertEquals(HttpStatus.OK, post("/api/tickets/finish", Map.of("counterId", counter1Id), att1Token).getStatusCode());
+            assertEquals(HttpStatus.OK, post("/api/tickets/start", Map.of("counterId", counter1Id), att1Session).getStatusCode());
+            assertEquals(HttpStatus.OK, post("/api/tickets/finish", Map.of("counterId", counter1Id), att1Session).getStatusCode());
         }
-        // 2 normals -> 1 priority -> 2 normals -> 1 priority
         assertEquals(List.of("A001", "A002", "P001", "A003", "A004", "P002"), order);
     }
 
     @Test
     @Order(4)
     void stateRules_andNormalFallback() {
-        // no priority waiting -> normal keeps flowing
         for (int i = 0; i < 2; i++)
             post("/api/public/tickets", Map.of("queueId", queueAId, "priorityType", "NORMAL"), null);
 
-        var called = post("/api/tickets/call-next", Map.of("counterId", counter1Id), att1Token);
+        var called = post("/api/tickets/call-next", Map.of("counterId", counter1Id), att1Session);
         assertEquals(HttpStatus.OK, called.getStatusCode());
         assertTrue(body(called).path("displayCode").asText().startsWith("A"));
 
-        // finish without start -> 409
-        assertEquals(HttpStatus.CONFLICT, post("/api/tickets/finish", Map.of("counterId", counter1Id), att1Token).getStatusCode());
-        // recall allowed while CALLED
-        assertEquals(HttpStatus.OK, post("/api/tickets/recall", Map.of("counterId", counter1Id), att1Token).getStatusCode());
-        // cannot call next with active ticket at same counter
-        assertEquals(HttpStatus.CONFLICT, post("/api/tickets/call-next", Map.of("counterId", counter1Id), att1Token).getStatusCode());
-        // absent while CALLED
-        assertEquals(HttpStatus.OK, post("/api/tickets/absent", Map.of("counterId", counter1Id), att1Token).getStatusCode());
-        // nothing active now
-        var state = exchange(HttpMethod.GET, "/api/tickets/state?counterId=" + counter1Id, null, att1Token);
+        assertEquals(HttpStatus.CONFLICT, post("/api/tickets/finish", Map.of("counterId", counter1Id), att1Session).getStatusCode());
+        assertEquals(HttpStatus.OK, post("/api/tickets/recall", Map.of("counterId", counter1Id), att1Session).getStatusCode());
+        assertEquals(HttpStatus.CONFLICT, post("/api/tickets/call-next", Map.of("counterId", counter1Id), att1Session).getStatusCode());
+        assertEquals(HttpStatus.OK, post("/api/tickets/absent", Map.of("counterId", counter1Id), att1Session).getStatusCode());
+        var state = exchange(HttpMethod.GET, "/api/tickets/state?counterId=" + counter1Id, null, att1Session);
         assertTrue(state.getBody().path("current").isNull());
     }
 
     @Test
     @Order(5)
     void dailySequenceReset() {
-        var qB = post("/api/queues", Map.of("name", "Fila B", "prefix", "B"), adminToken);
+        var qB = post("/api/queues", Map.of("name", "Fila B", "prefix", "B"), adminSession);
         queueBId = body(qB).path("id").asLong();
 
-        // yesterday's high counter must NOT leak into today
         jdbc.update("INSERT INTO daily_sequences(queue_id, day, last_number) VALUES (?, ?, 99)",
                 queueBId, LocalDate.now().minusDays(1));
         var firstToday = post("/api/public/tickets", Map.of("queueId", queueBId, "priorityType", "NORMAL"), null);
         assertEquals("B001", body(firstToday).path("displayCode").asText());
 
-        // pre-existing today row is honored
         jdbc.update("UPDATE daily_sequences SET last_number = 5 WHERE queue_id = ? AND day = ?", queueBId, LocalDate.now());
         var nextToday = post("/api/public/tickets", Map.of("queueId", queueBId, "priorityType", "NORMAL"), null);
         assertEquals("B006", body(nextToday).path("displayCode").asText());
@@ -176,7 +179,7 @@ class FlowIT {
         CountDownLatch start = new CountDownLatch(1);
         CountDownLatch done = new CountDownLatch(threads);
         List<AtomicReference<String>> codes = List.of(new AtomicReference<String>(), new AtomicReference<String>());
-        var tokens = List.of(att1Token, att2Token);
+        var sessions = List.of(att1Session, att2Session);
         var counters = List.of(counter1Id, counter2Id);
 
         for (int i = 0; i < threads; i++) {
@@ -184,7 +187,7 @@ class FlowIT {
             pool.submit(() -> {
                 try {
                     start.await();
-                    var r = post("/api/tickets/call-next", Map.of("counterId", counters.get(idx)), tokens.get(idx));
+                    var r = post("/api/tickets/call-next", Map.of("counterId", counters.get(idx)), sessions.get(idx));
                     codes.get(idx).set(r.getStatusCode().is2xxSuccessful() ? body(r).path("displayCode").asText() : "ERR:" + r.getStatusCode());
                 } catch (Exception e) {
                     codes.get(idx).set("EX:" + e.getMessage());
@@ -210,29 +213,40 @@ class FlowIT {
 
     @Test
     @Order(7)
-    void deactivatedUserCannotLogin_orUseOldToken() {
-        var upd = exchange(HttpMethod.PUT, "/api/users/" + att2UserId, Map.of("active", false), adminToken);
+    void deactivatedUserCannotLogin_orUseOldSession() {
+        var upd = exchange(HttpMethod.PUT, "/api/users/" + att2UserId, Map.of("active", false), adminSession);
         assertEquals(HttpStatus.OK, upd.getStatusCode());
 
         var login = post("/api/auth/login", Map.of("email", "att2@test.io", "password", "Secret1!"), null);
         assertEquals(HttpStatus.FORBIDDEN, login.getStatusCode());
 
-        var blocked = post("/api/tickets/call-next", Map.of("counterId", counter2Id), att2Token);
+        var blocked = post("/api/tickets/call-next", Map.of("counterId", counter2Id), att2Session);
         assertEquals(HttpStatus.UNAUTHORIZED, blocked.getStatusCode());
 
-        exchange(HttpMethod.PUT, "/api/users/" + att2UserId, Map.of("active", true), adminToken);
+        exchange(HttpMethod.PUT, "/api/users/" + att2UserId, Map.of("active", true), adminSession);
     }
 
     @Test
     @Order(8)
+    void logoutClearsSessionCookie() {
+        var logout = post("/api/auth/logout", null, att1Session);
+        assertEquals(HttpStatus.NO_CONTENT, logout.getStatusCode());
+        String setCookie = logout.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
+        assertNotNull(setCookie);
+        assertTrue(setCookie.startsWith("qf_session="));
+        assertTrue(setCookie.contains("Max-Age=0"));
+    }
+
+    @Test
+    @Order(9)
     void historyDashboardAndPublicEndpoints() {
-        var hist = exchange(HttpMethod.GET, "/api/history", null, adminToken);
+        var hist = exchange(HttpMethod.GET, "/api/history", null, adminSession);
         assertEquals(HttpStatus.OK, hist.getStatusCode());
         assertTrue(hist.getBody().path("totalElements").asInt() > 0);
         JsonNode firstRow = hist.getBody().path("content").get(0);
         assertNotNull(firstRow.path("waitMinutes"));
 
-        var dash = exchange(HttpMethod.GET, "/api/dashboard/today", null, adminToken);
+        var dash = exchange(HttpMethod.GET, "/api/dashboard/today", null, adminSession);
         assertEquals(HttpStatus.OK, dash.getStatusCode());
         assertTrue(dash.getBody().path("issuedToday").asInt() >= 14);
         assertTrue(dash.getBody().path("finishedToday").asInt() > 0);
@@ -244,7 +258,7 @@ class FlowIT {
         var publicQueues = exchange(HttpMethod.GET, "/api/public/queues", null, null);
         assertTrue(publicQueues.getBody().size() >= 2);
 
-        var settings = exchange(HttpMethod.GET, "/api/settings/priority", null, adminToken);
+        var settings = exchange(HttpMethod.GET, "/api/settings/priority", null, adminSession);
         assertEquals(2, settings.getBody().path("normalsBeforePriority").asInt());
     }
 }
