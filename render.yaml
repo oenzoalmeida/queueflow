@@ -1,31 +1,44 @@
-# Render Blueprint — provisions the backend web service and its Postgres database.
-# Env vars marked sync:false are entered manually in the Render dashboard (secrets,
-# or values that depend on the database/frontend URLs created alongside this service).
 services:
   - type: web
     name: queueflow-backend
-    env: java
+    runtime: docker
     plan: free
-    rootDir: backend
-    buildCommand: bash ./mvnw clean package -DskipTests
-    startCommand: java -jar target/queueflow-backend-1.0.0.jar
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     healthCheckPath: /api/public/health
+    autoDeployTrigger: commit
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
-      - key: SPRING_DATASOURCE_URL
-        sync: false
+      - key: SPRING_DATASOURCE_HOST
+        fromDatabase:
+          name: queueflow-db
+          property: host
+      - key: SPRING_DATASOURCE_PORT
+        fromDatabase:
+          name: queueflow-db
+          property: port
+      - key: SPRING_DATASOURCE_DATABASE
+        fromDatabase:
+          name: queueflow-db
+          property: database
       - key: SPRING_DATASOURCE_USERNAME
-        sync: false
+        fromDatabase:
+          name: queueflow-db
+          property: user
       - key: SPRING_DATASOURCE_PASSWORD
-        sync: false
+        fromDatabase:
+          name: queueflow-db
+          property: password
       - key: JWT_SECRET
-        sync: false
+        generateValue: true
       - key: FRONTEND_URL
         sync: false
 
 databases:
   - name: queueflow-db
     plan: free
+    region: oregon
     databaseName: queueflow
     user: queueflow
