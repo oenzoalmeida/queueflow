@@ -16,7 +16,7 @@ public class DailySequence {
     @Column(name = "last_number")
     private int lastNumber;
 
-    @Getter @Setter @NoArgsConstructor @AllArgsConstructor
+    @Getter @Setter @EqualsAndHashCode @NoArgsConstructor @AllArgsConstructor
     public static class PK implements Serializable {
         private Long queueId;
         private LocalDate day;
