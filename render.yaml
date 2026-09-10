@@ -6,7 +6,8 @@ services:
     name: queueflow-backend
     env: java
     plan: free
-    buildCommand: ./mvnw clean package -DskipTests
+    rootDir: backend
+    buildCommand: bash ./mvnw clean package -DskipTests
     startCommand: java -jar target/queueflow-backend-1.0.0.jar
     healthCheckPath: /api/public/health
     envVars:
