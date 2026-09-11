@@ -21,7 +21,7 @@ On the Render service, set:
 Render sets `PORT` automatically — no action needed.
 
 ## 4. Get the backend's public URL
-After the first successful deploy, copy the service URL, e.g. `https://queueflow-backend.onrender.com`.
+After the first successful deploy, copy the service URL (production: `https://queueflow-backend-is0i.onrender.com`).
 
 ## 5. Frontend on Netlify
 1. Netlify → Add new site → Import from Git (or drag-and-drop `frontend/dist` after a local `npm run build` if not using Git).
@@ -29,7 +29,7 @@ After the first successful deploy, copy the service URL, e.g. `https://queueflow
 
 ## 6. Configure `VITE_API_URL`
 In Netlify → Site settings → Environment variables, set:
-- `VITE_API_URL=https://queueflow-backend.onrender.com` (the URL from step 4, no trailing slash)
+- `VITE_API_URL=https://queueflow-backend-is0i.onrender.com` (the URL from step 4, no trailing slash)
 
 (`VITE_WS_URL` is optional — the WebSocket URL is derived from `VITE_API_URL` automatically.)
 
@@ -43,6 +43,6 @@ Back on Render, set `FRONTEND_URL=https://queueflow.netlify.app` on the backend 
 Open the Netlify site's `/display` page in one tab and the attendant screen in another; call a ticket and confirm the display updates live. Check the browser console — the STOMP/SockJS connection should use `wss://` against the Render URL, with no CORS errors.
 
 ## 10. Smoke test
-- `https://queueflow-backend.onrender.com/api/public/health` → `{"status":"UP"}`
+- `https://queueflow-backend-is0i.onrender.com/api/public/health` → `{"status":"UP"}`
 - Register the first user via the frontend login screen (becomes `ADMIN` automatically — no dev data is seeded in `prod`)
 - Create a queue and a counter, issue a ticket from `/totem`, call it from `/attendant`, confirm `/display` updates live
