@@ -20,7 +20,9 @@ O projeto utiliza uma arquitetura separada entre frontend e backend, com comunic
 - **Atendente (ATTENDANT):** acesso à tela operacional de atendimento.
 - **Totem e Display:** rotas públicas para emissão e exibição de senhas, sem necessidade de login.
 
-As credenciais de demonstração são mantidas fora do repositório e provisionadas por configuração segura do ambiente de produção.
+**Conta demo (atendente):** `demo@queueflow.app` / `Demo@2026`
+
+> As contas de administrador são provisionadas por configuração segura do ambiente de produção e não são públicas.
 
 ## Principais recursos
 
