@@ -59,6 +59,18 @@ class FlowIT {
     }
 
     @Test
+    @Order(0)
+    void sessionLookupWithoutValidCookieReturnsUnauthorized() {
+        var anonymous = exchange(HttpMethod.GET, "/api/auth/me", null, null);
+        assertEquals(HttpStatus.UNAUTHORIZED, anonymous.getStatusCode());
+        assertEquals(401, body(anonymous).path("status").asInt());
+        assertEquals("Não autenticado.", body(anonymous).path("message").asText());
+
+        var invalid = exchange(HttpMethod.GET, "/api/auth/me", null, "qf_session=invalid");
+        assertEquals(HttpStatus.UNAUTHORIZED, invalid.getStatusCode());
+    }
+
+    @Test
     @Order(1)
     void firstUserIsAdmin_secondIsAttendant_loginWorks() {
         var reg1 = post("/api/auth/register",
@@ -86,6 +98,10 @@ class FlowIT {
         var me = exchange(HttpMethod.GET, "/api/auth/me", null, adminSession);
         assertEquals(HttpStatus.OK, me.getStatusCode());
         assertEquals("ADMIN", body(me).path("role").asText());
+
+        var attendantMe = exchange(HttpMethod.GET, "/api/auth/me", null, att1Session);
+        assertEquals(HttpStatus.OK, attendantMe.getStatusCode());
+        assertEquals("ATTENDANT", body(attendantMe).path("role").asText());
 
         var bad = post("/api/auth/login", Map.of("email", "admin@test.io", "password", "wrong"), null);
         assertEquals(HttpStatus.UNAUTHORIZED, bad.getStatusCode());

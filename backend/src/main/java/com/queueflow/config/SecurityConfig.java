@@ -57,7 +57,9 @@ public class SecurityConfig {
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(ex -> ex.authenticationEntryPoint(jsonEntry).accessDeniedHandler(jsonDenied))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/api/public/**", "/ws/**", "/error").permitAll()
+                .requestMatchers("/api/auth/me").authenticated()
+                .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/logout",
+                                 "/api/public/**", "/ws/**", "/error").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/counters", "/api/counters/{id}").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/counters/*/claim", "/api/counters/release").authenticated()
                 .requestMatchers("/api/queues/**", "/api/users/**", "/api/history/**",
