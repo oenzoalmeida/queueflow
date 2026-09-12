@@ -20,9 +20,14 @@ O projeto utiliza uma arquitetura separada entre frontend e backend, com comunic
 - **Atendente (ATTENDANT):** acesso à tela operacional de atendimento.
 - **Totem e Display:** rotas públicas para emissão e exibição de senhas, sem necessidade de login.
 
-**Conta demo (atendente):** `demo@queueflow.app` / `Demo@2026`
+**Contas demo:**
 
-> As contas de administrador são provisionadas por configuração segura do ambiente de produção e não são públicas.
+| Perfil | E-mail | Senha |
+| --- | --- | --- |
+| Administrador (ADMIN) | `admin@queueflow.app` | `Admin@Portfolio2026` |
+| Atendente (ATTENDANT) | `demo@queueflow.app` | `Demo@2026` |
+
+> Essas contas são provisionadas pelo bootstrap do backend (variáveis `QUEUEFLOW_BOOTSTRAP_*` no Render) e servem apenas para demonstração do portfólio.
 
 ## Principais recursos
 
