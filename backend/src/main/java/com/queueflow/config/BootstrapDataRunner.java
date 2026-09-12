@@ -51,7 +51,7 @@ public class BootstrapDataRunner implements CommandLineRunner {
     public void run(String... args) {
         validateCredentials();
 
-        users.findByEmailIgnoreCase(adminEmail).orElseGet(() ->
+        User admin = users.findByEmailIgnoreCase(adminEmail).orElseGet(() ->
                 users.save(User.builder()
                         .name("Admin Demo")
                         .email(adminEmail.trim().toLowerCase())
@@ -60,6 +60,11 @@ public class BootstrapDataRunner implements CommandLineRunner {
                         .active(true)
                         .createdAt(Instant.now())
                         .build()));
+        if (!encoder.matches(adminPassword, admin.getPasswordHash())) {
+            admin.setPasswordHash(encoder.encode(adminPassword));
+            users.save(admin);
+            log.info("QueueFlow bootstrap synced admin demo password from environment");
+        }
 
         users.findByEmailIgnoreCase(attendantEmail).orElseGet(() ->
                 users.save(User.builder()
