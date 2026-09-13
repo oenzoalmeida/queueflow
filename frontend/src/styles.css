@@ -185,3 +185,13 @@ tr:hover td { background: #f8fafd; }
   .inline-form input { min-width: 120px; }
   .display-history ul { flex-direction: column; gap: 8px; }
 }
+
+/* ---------- páginas jurídicas ---------- */
+.legal-page { min-height: 100vh; background: #f4f6fb; padding: 40px 16px; }
+.legal-card { background: #fff; border-radius: 14px; padding: 40px; width: min(92vw, 820px); margin: 0 auto; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); }
+.legal-card h1 { color: var(--primary-dark); }
+.legal-card h2 { color: var(--primary-dark); font-size: 1.05rem; margin-top: 24px; }
+.legal-card p { line-height: 1.6; }
+.legal-links { margin-top: 28px; text-align: center; }
+.login-legal { margin-top: 16px; font-size: 0.85rem; }
+.login-legal a { color: var(--primary-dark); }

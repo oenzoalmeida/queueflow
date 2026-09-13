@@ -39,6 +39,9 @@ export default function Login() {
         <button className="btn primary" disabled={loading}>
           {loading ? 'Entrando…' : 'Entrar'}
         </button>
+        <p className="login-legal muted">
+          <a href="/termos">Termos de Uso</a> · <a href="/privacidade">Política de Privacidade</a>
+        </p>
       </form>
     </div>
   )

@@ -86,6 +86,29 @@ Também é possível utilizar o `docker-compose.yml` disponível na raiz para su
 
 Consulte o arquivo `DEPLOY.md` para detalhes adicionais sobre publicação e configuração dos ambientes.
 
+## Segurança e privacidade
+
+- Autenticação por JWT e autorização por papel: telas administrativas exigem `ADMIN` e a tela operacional exige `ATTENDANT`.
+- Senhas armazenadas apenas como hash; a conta administrativa é provisionada internamente pelo bootstrap do backend, sem credencial pública.
+- Totem e display são públicos por design e não coletam dados pessoais dos clientes atendidos.
+- Páginas de [Termos de Uso](https://queueflow-frontend.onrender.com/termos) e [Política de Privacidade](https://queueflow-frontend.onrender.com/privacidade) disponíveis no rodapé do login.
+
+## Testes
+
+- Backend: testes automatizados (integração e política de chamada de senhas) executados com `./mvnw test` e validados no CI a cada push.
+
+## Deploy
+
+- Frontend (produção): <https://queueflow-frontend.onrender.com>
+- Backend (produção): <https://queueflow-backend-is0i.onrender.com>
+- O `render.yaml` provisiona os serviços no Render; o fluxo alternativo com Netlify (`netlify.toml`) está descrito no `DEPLOY.md`.
+
+## Limitações conhecidas
+
+- A demonstração roda em infraestrutura gratuita: os serviços hibernam após inatividade (primeiro acesso fica lento) e os dados podem ser redefinidos.
+- O projeto atende a um único estabelecimento por instância.
+- O frontend não possui testes automatizados; é validado por build no CI.
+
 ## Autor
 
 Enzo Almeida

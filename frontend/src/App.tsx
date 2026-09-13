@@ -10,6 +10,8 @@ import Settings from './pages/Settings'
 import AttendantScreen from './pages/AttendantScreen'
 import Totem from './pages/Totem'
 import Display from './pages/Display'
+import Termos from './pages/Termos'
+import Privacidade from './pages/Privacidade'
 import AdminLayout from './components/AdminLayout'
 
 function RequireRole({ role, children }: { role: 'ADMIN' | 'ATTENDANT' | 'ANY'; children: React.ReactNode }) {
@@ -47,6 +49,8 @@ export default function App() {
 
       <Route path="/totem" element={<Totem />} />
       <Route path="/display" element={<Display />} />
+      <Route path="/termos" element={<Termos />} />
+      <Route path="/privacidade" element={<Privacidade />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
