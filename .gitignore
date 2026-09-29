@@ -35,3 +35,8 @@ Thumbs.db
 # Local Netlify folder
 .netlify
 .claude/
+
+# Local Spring profile (não versionado)
+backend/src/main/resources/application-local.yml
+application-local.yml
+!*.example

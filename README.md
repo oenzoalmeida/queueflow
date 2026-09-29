@@ -84,6 +84,24 @@ O projeto possui arquivos de configuração de ambiente de exemplo em `backend/.
 
 Também é possível utilizar o `docker-compose.yml` disponível na raiz para subir os serviços necessários ao ambiente local.
 
+O secret JWT não fica mais hardcoded no repositório. Para rodar o backend localmente:
+
+1. Copie o exemplo de perfil local e defina o seu secret:
+
+   ```bash
+   cp backend/src/main/resources/application-local.yml.example backend/src/main/resources/application-local.yml
+   ```
+
+2. Edite `backend/src/main/resources/application-local.yml` e troque o valor de `app.jwt.secret` por um secret seu (ex.: string base64 de 32+ caracteres).
+
+3. Rode com o perfil `local`:
+
+   ```bash
+   SPRING_PROFILES_ACTIVE=local ./mvnw spring-boot:run
+   ```
+
+Em produção, o perfil `prod` continua sendo usado com a variável de ambiente `JWT_SECRET` (ver `render.yaml`).
+
 Consulte o arquivo `DEPLOY.md` para detalhes adicionais sobre publicação e configuração dos ambientes.
 
 ## Segurança e privacidade
