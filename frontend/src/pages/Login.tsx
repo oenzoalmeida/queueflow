@@ -32,10 +32,10 @@ export default function Login() {
         <h1>QueueFlow</h1>
         <p className="muted">Gerenciamento de filas e senhas</p>
         {error && <div className="alert error">{error}</div>}
-        <label>Email</label>
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@empresa.com" required autoFocus />
-        <label>Senha</label>
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
+        <label htmlFor="login-email">Email</label>
+        <input id="login-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@empresa.com" required autoFocus />
+        <label htmlFor="login-password">Senha</label>
+        <input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
         <button className="btn primary" disabled={loading}>
           {loading ? 'Entrando…' : 'Entrar'}
         </button>
