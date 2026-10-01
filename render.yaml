@@ -11,43 +11,33 @@ services:
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
-      - key: SPRING_DATASOURCE_HOST
-        fromDatabase:
-          name: queueflow-db2
-          property: host
-      - key: SPRING_DATASOURCE_PORT
-        fromDatabase:
-          name: queueflow-db2
-          property: port
-      - key: SPRING_DATASOURCE_DATABASE
-        fromDatabase:
-          name: queueflow-db2
-          property: database
+      # Banco migrado para PostgreSQL externo (Aiven Free) em 01/10/2026.
+      # Valores definidos no dashboard do Render (credenciais fora do Git).
+      # SPRING_DATASOURCE_URL sobrescreve spring.datasource.url do
+      # application-prod.yml e inclui sslmode=require (exigido pelo Aiven).
+      - key: SPRING_DATASOURCE_URL
+        sync: false
       - key: SPRING_DATASOURCE_USERNAME
-        fromDatabase:
-          name: queueflow-db2
-          property: user
+        sync: false
       - key: SPRING_DATASOURCE_PASSWORD
-        fromDatabase:
-          name: queueflow-db2
-          property: password
+        sync: false
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
         sync: false
 
 databases:
-  # queueflow-db (free) expirou em ~26/09/2026 e está suspenso pelo Render.
-  # Mantido no spec apenas para preservar o recurso (dados recuperáveis por
-  # ~9 dias via upgrade); remover este bloco só depois do destino do banco
-  # antigo ser decidido (export/upgrade), ou o sync pode recriá-lo vazio.
+  # DESACOPLADOS do serviço em 01/10/2026 (banco de produção migrado para o
+  # Aiven Free). Mantidos no spec de propósito para o blueprint NÃO deletar
+  # os recursos: queueflow-db (suspenso, backup exportado) e queueflow-db2
+  # (ativo até 31/10/2026). Remover os dois blocos só quando decidirem
+  # excluí-los definitivamente no dashboard do Render.
   - name: queueflow-db
     plan: free
     region: oregon
     databaseName: queueflow
     user: queueflow
 
-  # Substituto ativo do banco de produção a partir de 01/10/2026.
   - name: queueflow-db2
     plan: free
     region: oregon
