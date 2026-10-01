@@ -13,23 +13,23 @@ services:
         value: prod
       - key: SPRING_DATASOURCE_HOST
         fromDatabase:
-          name: queueflow-db
+          name: queueflow-db2
           property: host
       - key: SPRING_DATASOURCE_PORT
         fromDatabase:
-          name: queueflow-db
+          name: queueflow-db2
           property: port
       - key: SPRING_DATASOURCE_DATABASE
         fromDatabase:
-          name: queueflow-db
+          name: queueflow-db2
           property: database
       - key: SPRING_DATASOURCE_USERNAME
         fromDatabase:
-          name: queueflow-db
+          name: queueflow-db2
           property: user
       - key: SPRING_DATASOURCE_PASSWORD
         fromDatabase:
-          name: queueflow-db
+          name: queueflow-db2
           property: password
       - key: JWT_SECRET
         generateValue: true
@@ -37,8 +37,19 @@ services:
         sync: false
 
 databases:
+  # queueflow-db (free) expirou em ~26/09/2026 e está suspenso pelo Render.
+  # Mantido no spec apenas para preservar o recurso (dados recuperáveis por
+  # ~9 dias via upgrade); remover este bloco só depois do destino do banco
+  # antigo ser decidido (export/upgrade), ou o sync pode recriá-lo vazio.
   - name: queueflow-db
     plan: free
     region: oregon
     databaseName: queueflow
+    user: queueflow
+
+  # Substituto ativo do banco de produção a partir de 01/10/2026.
+  - name: queueflow-db2
+    plan: free
+    region: oregon
+    databaseName: queueflow2
     user: queueflow
