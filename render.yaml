@@ -26,20 +26,3 @@ services:
       - key: FRONTEND_URL
         sync: false
 
-databases:
-  # DESACOPLADOS do serviço em 01/10/2026 (banco de produção migrado para o
-  # Aiven Free). Mantidos no spec de propósito para o blueprint NÃO deletar
-  # os recursos: queueflow-db (suspenso, backup exportado) e queueflow-db2
-  # (ativo até 31/10/2026). Remover os dois blocos só quando decidirem
-  # excluí-los definitivamente no dashboard do Render.
-  - name: queueflow-db
-    plan: free
-    region: oregon
-    databaseName: queueflow
-    user: queueflow
-
-  - name: queueflow-db2
-    plan: free
-    region: oregon
-    databaseName: queueflow2
-    user: queueflow
