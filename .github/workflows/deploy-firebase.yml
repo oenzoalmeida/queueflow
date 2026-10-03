@@ -1,0 +1,44 @@
+name: Deploy Frontend (Firebase Hosting)
+
+# Deploy manual apenas: não altera os deploys atuais do Render/Netlify.
+# Autenticação keyless via Workload Identity Federation (sem chave de service account).
+# Secrets necessários no repositório:
+#   FIREBASE_WIF_PROVIDER  - projects/<num>/locations/global/workloadIdentityPools/github-pool/providers/github
+#   FIREBASE_DEPLOY_SA     - firebase-deployer@<project>.iam.gserviceaccount.com
+#
+# IMPORTANTE: o build precisa da VITE_API_URL definida, pois o Vite embute o
+# valor nos assets. Sem ela, /api e /ws cairiam no próprio Hosting (404).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build frontend
+        working-directory: frontend
+        env:
+          VITE_API_URL: https://queueflow-backend-is0i.onrender.com
+        run: |
+          npm ci
+          npm run build
+
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.FIREBASE_WIF_PROVIDER }}
+          service_account: ${{ secrets.FIREBASE_DEPLOY_SA }}
+
+      - name: Deploy to Firebase Hosting
+        run: npx --yes firebase-tools@latest deploy --only hosting --project oenzoa-queueflow --non-interactive
