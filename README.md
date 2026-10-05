@@ -1,18 +1,22 @@
 # QueueFlow
 
-Sistema full stack para gerenciamento de filas de atendimento em tempo real, com painel de acompanhamento, autenticação e atualização instantânea dos atendimentos.
+Sistema full stack para gerenciamento de filas de atendimento em tempo real: senhas, guichês e o andamento da fila atualizados instantaneamente via WebSocket, com painel administrativo, tela operacional de atendimento e rotas públicas de totem e display.
+
+O projeto separa frontend e backend — React/TypeScript na interface e API Java/Spring Boot com PostgreSQL — com autenticação JWT e autorização por papel.
 
 ## Demonstração
 
-[Acessar o QueueFlow online](https://queueflow-frontend.onrender.com)
+**Frontend (produção):** https://queueflow-frontend.onrender.com
 
-> Para uso normal, compartilhe apenas o link acima. O backend é um serviço técnico utilizado pelo frontend.
+> Para uso normal, compartilhe apenas o link acima. O backend é um serviço técnico utilizado pelo frontend. A demo roda em infraestrutura gratuita: os serviços hibernam após inatividade (o primeiro acesso fica lento) e os dados podem ser redefinidos.
+
+**Conta demo (atendente):** `demo@queueflow.app` / `Demo@2026`
+
+O acesso administrativo é provisionado internamente via bootstrap do backend (variáveis `QUEUEFLOW_BOOTSTRAP_*`) e não possui credencial pública.
 
 ## Sobre o projeto
 
-O QueueFlow foi desenvolvido para organizar o fluxo de atendimento de estabelecimentos, permitindo controlar senhas, guichês e o andamento da fila por meio de uma aplicação web.
-
-O projeto utiliza uma arquitetura separada entre frontend e backend, com comunicação em tempo real via WebSocket.
+O QueueFlow foi desenvolvido para organizar o fluxo de atendimento de estabelecimentos, permitindo controlar senhas, guichês e o andamento da fila por meio de uma aplicação web, com atualização em tempo real entre as telas.
 
 ## Perfis de acesso
 
@@ -20,57 +24,31 @@ O projeto utiliza uma arquitetura separada entre frontend e backend, com comunic
 - **Atendente (ATTENDANT):** acesso à tela operacional de atendimento.
 - **Totem e Display:** rotas públicas para emissão e exibição de senhas, sem necessidade de login.
 
-**Conta demo (atendente):** `demo@queueflow.app` / `Demo@2026`
-
-> O acesso administrativo é provisionado internamente via bootstrap do backend (variáveis `QUEUEFLOW_BOOTSTRAP_*`) e não possui credencial pública.
-
-## Principais recursos
+## Principais funcionalidades
 
 - Gerenciamento de filas e senhas
 - Controle de guichês de atendimento
 - Painel com informações da operação
-- Atualizações em tempo real com WebSocket
+- Atualizações em tempo real com WebSocket (STOMP/SockJS)
 - Autenticação e autorização com JWT
-- Persistência de dados em PostgreSQL
+- Persistência de dados em PostgreSQL com migrações Flyway
 - Validação de dados e tratamento centralizado de erros
 - Estrutura preparada para execução com Docker
 
 ## Tecnologias
 
-### Frontend
+**Frontend:** React, TypeScript, Vite, React Router, Axios, STOMP/SockJS, Lucide React.
 
-- React
-- TypeScript
-- Vite
-- React Router
-- Axios
-- STOMP / SockJS
-- Lucide React
+**Backend:** Java 21, Spring Boot 3, Spring Web, Spring Data JPA, Spring Security, Spring WebSocket, JWT, Flyway, PostgreSQL.
 
-### Backend
+**Infraestrutura:** Docker, Docker Compose, Render (deploy descrito em `render.yaml` e `DEPLOY.md`).
 
-- Java 21
-- Spring Boot 3
-- Spring Web
-- Spring Data JPA
-- Spring Security
-- Spring WebSocket
-- JWT
-- Flyway
-- PostgreSQL
-
-### Infraestrutura
-
-- Docker
-- Docker Compose
-- Render
-
-## Estrutura do projeto
+## Arquitetura / Estrutura
 
 ```text
 queueflow/
-├── backend/          API Spring Boot
-├── frontend/         Aplicação React + TypeScript
+├── backend/          API Spring Boot (REST + WebSocket)
+├── frontend/         Aplicação React + TypeScript (Vite)
 ├── docker-compose.yml
 ├── Dockerfile
 ├── render.yaml
@@ -78,31 +56,46 @@ queueflow/
 └── DEPLOY.md
 ```
 
-## Executando localmente
+## Como executar
 
-O projeto possui arquivos de configuração de ambiente de exemplo em `backend/.env.example` e `frontend/.env.example`.
+Opção 1 — Docker Compose (sobem os serviços necessários ao ambiente local):
 
-Também é possível utilizar o `docker-compose.yml` disponível na raiz para subir os serviços necessários ao ambiente local.
+```bash
+docker compose up
+```
 
-O secret JWT não fica mais hardcoded no repositório. Para rodar o backend localmente:
+Opção 2 — Backend manualmente. O secret JWT não é versionado; use o perfil local de exemplo:
 
-1. Copie o exemplo de perfil local e defina o seu secret:
+1. Copie o perfil local e defina o seu secret:
 
    ```bash
    cp backend/src/main/resources/application-local.yml.example backend/src/main/resources/application-local.yml
    ```
 
-2. Edite `backend/src/main/resources/application-local.yml` e troque o valor de `app.jwt.secret` por um secret seu (ex.: string base64 de 32+ caracteres).
+2. Edite `application-local.yml` e troque `app.jwt.secret` por um secret seu (ex.: string base64 de 32+ caracteres).
 
-3. Rode com o perfil `local`:
+3. Rode com o perfil `local` (o frontend em desenvolvimento usa o proxy do Vite para `http://localhost:8080`):
 
    ```bash
+   cd backend
    SPRING_PROFILES_ACTIVE=local ./mvnw spring-boot:run
+   cd ../frontend && npm install && npm run dev
    ```
 
-Em produção, o perfil `prod` continua sendo usado com a variável de ambiente `JWT_SECRET` (ver `render.yaml`).
+Detalhes de publicação e ambientes: [`DEPLOY.md`](DEPLOY.md).
 
-Consulte o arquivo `DEPLOY.md` para detalhes adicionais sobre publicação e configuração dos ambientes.
+## Variáveis de ambiente
+
+Backend em produção (`backend/.env.example`):
+
+| Variável | Descrição |
+|---|---|
+| `SPRING_DATASOURCE_URL` / `SPRING_DATASOURCE_USERNAME` / `SPRING_DATASOURCE_PASSWORD` | Conexão PostgreSQL |
+| `JWT_SECRET` | Secret JWT (obrigatório no perfil `prod`) |
+| `FRONTEND_URL` | Origem do frontend para CORS |
+| `PORT` | Porta do serviço (padrão 8080) |
+
+Frontend (`frontend/.env.example`): `VITE_API_URL` (origem da API em produção; em desenvolvimento o proxy do Vite cobre) e `VITE_WS_URL` (opcional, derivado da API).
 
 ## Segurança e privacidade
 
@@ -114,12 +107,17 @@ Consulte o arquivo `DEPLOY.md` para detalhes adicionais sobre publicação e con
 ## Testes
 
 - Backend: testes automatizados (integração e política de chamada de senhas) executados com `./mvnw test` e validados no CI a cada push.
+- Frontend: validado por build no CI (sem testes automatizados).
 
 ## Deploy
 
-- Frontend (produção): <https://queueflow-frontend.onrender.com>
-- Backend (produção): <https://queueflow-backend-is0i.onrender.com>
+- Frontend (produção): https://queueflow-frontend.onrender.com
+- Backend (produção): https://queueflow-backend-is0i.onrender.com
 - O `render.yaml` provisiona os serviços no Render; o fluxo alternativo com Netlify (`netlify.toml`) está descrito no `DEPLOY.md`.
+
+## Status
+
+Versão estável publicada e em produção nos links acima.
 
 ## Limitações conhecidas
 
