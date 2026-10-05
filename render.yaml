@@ -8,6 +8,13 @@ services:
     dockerContext: .
     healthCheckPath: /api/public/health
     autoDeployTrigger: commit
+    # Monorepo: só redeploya o backend quando algo que afeta a imagem dele mudar.
+    # Alterações em frontend/**, workflows do GitHub, docs etc. não devem reiniciar
+    # o serviço do backend no Render.
+    buildFilter:
+      paths:
+        - backend/**
+        - Dockerfile
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
@@ -25,4 +32,3 @@ services:
         generateValue: true
       - key: FRONTEND_URL
         sync: false
-
