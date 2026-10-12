@@ -30,7 +30,7 @@ jobs:
       - name: Build frontend
         working-directory: frontend
         env:
-          VITE_API_URL: https://queueflow-backend-is0i.onrender.com
+          VITE_API_URL: https://queueflow-backend.oenzoalmeida.blitz.cloud
         run: |
           npm ci
           npm run build
