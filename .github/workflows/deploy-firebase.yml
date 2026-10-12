@@ -41,10 +41,13 @@ jobs:
           workload_identity_provider: ${{ secrets.FIREBASE_WIF_PROVIDER }}
           service_account: ${{ secrets.FIREBASE_DEPLOY_SA }}
           token_format: access_token
+          token_format: access_token
 
       - name: Deploy to Firebase Hosting
+        env:
+          ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
         env:
           # firebase-tools não resolve credenciais federadas (WIF) via ADC;
           # o token de acesso emitido pela SA é o caminho suportado em CI.
           GOOGLE_OAUTH_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
-        run: npx --yes firebase-tools@latest deploy --only hosting --project oenzoa-queueflow --non-interactive
+        run: npx --yes firebase-tools@latest deploy --only hosting --project oenzoa-queueflow --non-interactive --token ""
