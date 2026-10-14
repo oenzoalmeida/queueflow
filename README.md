@@ -6,9 +6,9 @@ O projeto separa frontend e backend — React/TypeScript na interface e API Java
 
 ## Demonstração
 
-**Frontend (produção):** https://queueflow-frontend.onrender.com
+**Frontend (produção):** https://oenzoa-queueflow.web.app
 
-> Para uso normal, compartilhe apenas o link acima. O backend é um serviço técnico utilizado pelo frontend. A demo roda em infraestrutura gratuita: os serviços hibernam após inatividade (o primeiro acesso fica lento) e os dados podem ser redefinidos.
+> Para uso normal, compartilhe apenas o link acima. O backend é um serviço técnico utilizado pelo frontend. A demo roda em infraestrutura gratuita e os dados podem ser redefinidos.
 
 **Conta demo (atendente):** `demo@queueflow.app` / `Demo@2026`
 
@@ -41,7 +41,7 @@ O QueueFlow foi desenvolvido para organizar o fluxo de atendimento de estabeleci
 
 **Backend:** Java 21, Spring Boot 3, Spring Web, Spring Data JPA, Spring Security, Spring WebSocket, JWT, Flyway, PostgreSQL.
 
-**Infraestrutura:** Docker, Docker Compose, Render (deploy descrito em `render.yaml` e `DEPLOY.md`).
+**Infraestrutura:** Docker, Docker Compose, Azure App Service (backend), Firebase Hosting (frontend), PostgreSQL gerenciado (Aiven).
 
 ## Arquitetura / Estrutura
 
@@ -102,7 +102,7 @@ Frontend (`frontend/.env.example`): `VITE_API_URL` (origem da API em produção;
 - Autenticação por JWT e autorização por papel: telas administrativas exigem `ADMIN` e a tela operacional exige `ATTENDANT`.
 - Senhas armazenadas apenas como hash; a conta administrativa é provisionada internamente pelo bootstrap do backend, sem credencial pública.
 - Totem e display são públicos por design e não coletam dados pessoais dos clientes atendidos.
-- Páginas de [Termos de Uso](https://queueflow-frontend.onrender.com/termos) e [Política de Privacidade](https://queueflow-frontend.onrender.com/privacidade) disponíveis no rodapé do login.
+- Páginas de [Termos de Uso](https://oenzoa-queueflow.web.app/termos) e [Política de Privacidade](https://oenzoa-queueflow.web.app/privacidade) disponíveis no rodapé do login.
 
 ## Testes
 
@@ -111,9 +111,10 @@ Frontend (`frontend/.env.example`): `VITE_API_URL` (origem da API em produção;
 
 ## Deploy
 
-- Frontend (produção): https://queueflow-frontend.onrender.com
-- Backend (produção): https://queueflow-backend-is0i.onrender.com
-- O `render.yaml` provisiona os serviços no Render; o fluxo alternativo com Netlify (`netlify.toml`) está descrito no `DEPLOY.md`.
+- Frontend (produção): https://oenzoa-queueflow.web.app (Firebase Hosting, deploy via GitHub Actions)
+- Backend (produção): https://queueflow-backend-oe.azurewebsites.net (Azure App Service B1, container GHCR, Always On + WebSockets)
+- Banco de dados: PostgreSQL gerenciado no Aiven (preservado na migração Render → Azure).
+- `render.yaml` e `DEPLOY.md` são legados da hospedagem anterior no Render.
 
 ## Status
 
