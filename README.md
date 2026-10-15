@@ -2,7 +2,7 @@
 
 Sistema full stack para gerenciamento de filas de atendimento em tempo real: senhas, guichês e o andamento da fila atualizados instantaneamente via WebSocket, com painel administrativo, tela operacional de atendimento e rotas públicas de totem e display.
 
-O projeto separa frontend e backend — React/TypeScript na interface e API Java/Spring Boot com PostgreSQL — com autenticação JWT e autorização por papel.
+O projeto separa frontend e backend (React/TypeScript na interface e API Java/Spring Boot com PostgreSQL), com autenticação JWT e autorização por papel.
 
 ## Demonstração
 
@@ -20,20 +20,29 @@ O QueueFlow foi desenvolvido para organizar o fluxo de atendimento de estabeleci
 
 ## Perfis de acesso
 
-- **Administrador (ADMIN):** acesso ao painel administrativo e à configuração da operação.
-- **Atendente (ATTENDANT):** acesso à tela operacional de atendimento.
-- **Totem e Display:** rotas públicas para emissão e exibição de senhas, sem necessidade de login.
+**Administrador (ADMIN):** acesso ao painel administrativo e à configuração da operação.
+
+**Atendente (ATTENDANT):** acesso à tela operacional de atendimento.
+
+**Totem e Display:** rotas públicas para emissão e exibição de senhas, sem necessidade de login.
 
 ## Principais funcionalidades
 
-- Gerenciamento de filas e senhas
-- Controle de guichês de atendimento
-- Painel com informações da operação
-- Atualizações em tempo real com WebSocket (STOMP/SockJS)
-- Autenticação e autorização com JWT
-- Persistência de dados em PostgreSQL com migrações Flyway
-- Validação de dados e tratamento centralizado de erros
-- Estrutura preparada para execução com Docker
+Gerenciamento de filas e senhas.
+
+Controle de guichês de atendimento.
+
+Painel com informações da operação.
+
+Atualizações em tempo real com WebSocket (STOMP/SockJS).
+
+Autenticação e autorização com JWT.
+
+Persistência de dados em PostgreSQL com migrações Flyway.
+
+Validação de dados e tratamento centralizado de erros.
+
+Estrutura preparada para execução com Docker.
 
 ## Tecnologias
 
@@ -58,29 +67,29 @@ queueflow/
 
 ## Como executar
 
-Opção 1 — Docker Compose (sobem os serviços necessários ao ambiente local):
+Opção 1: Docker Compose (sobem os serviços necessários ao ambiente local):
 
 ```bash
 docker compose up
 ```
 
-Opção 2 — Backend manualmente. O secret JWT não é versionado; use o perfil local de exemplo:
+Opção 2: backend manualmente. O secret JWT não é versionado. Use o perfil local de exemplo:
 
-1. Copie o perfil local e defina o seu secret:
+**Passo 1.** Copie o perfil local e defina o seu secret:
 
-   ```bash
-   cp backend/src/main/resources/application-local.yml.example backend/src/main/resources/application-local.yml
-   ```
+```bash
+cp backend/src/main/resources/application-local.yml.example backend/src/main/resources/application-local.yml
+```
 
-2. Edite `application-local.yml` e troque `app.jwt.secret` por um secret seu (ex.: string base64 de 32+ caracteres).
+**Passo 2.** Edite `application-local.yml` e troque `app.jwt.secret` por um secret seu (ex.: string base64 de 32+ caracteres).
 
-3. Rode com o perfil `local` (o frontend em desenvolvimento usa o proxy do Vite para `http://localhost:8080`):
+**Passo 3.** Rode com o perfil `local` (o frontend em desenvolvimento usa o proxy do Vite para `http://localhost:8080`):
 
-   ```bash
-   cd backend
-   SPRING_PROFILES_ACTIVE=local ./mvnw spring-boot:run
-   cd ../frontend && npm install && npm run dev
-   ```
+```bash
+cd backend
+SPRING_PROFILES_ACTIVE=local ./mvnw spring-boot:run
+cd ../frontend && npm install && npm run dev
+```
 
 Detalhes de publicação e ambientes: [`DEPLOY.md`](DEPLOY.md).
 
@@ -95,26 +104,33 @@ Backend em produção (`backend/.env.example`):
 | `FRONTEND_URL` | Origem do frontend para CORS |
 | `PORT` | Porta do serviço (padrão 8080) |
 
-Frontend (`frontend/.env.example`): `VITE_API_URL` (origem da API em produção; em desenvolvimento o proxy do Vite cobre) e `VITE_WS_URL` (opcional, derivado da API).
+Frontend (`frontend/.env.example`): `VITE_API_URL` (origem da API em produção, em desenvolvimento o proxy do Vite cobre) e `VITE_WS_URL` (opcional, derivado da API).
 
 ## Segurança e privacidade
 
-- Autenticação por JWT e autorização por papel: telas administrativas exigem `ADMIN` e a tela operacional exige `ATTENDANT`.
-- Senhas armazenadas apenas como hash; a conta administrativa é provisionada internamente pelo bootstrap do backend, sem credencial pública.
-- Totem e display são públicos por design e não coletam dados pessoais dos clientes atendidos.
-- Páginas de [Termos de Uso](https://oenzoa-queueflow.web.app/termos) e [Política de Privacidade](https://oenzoa-queueflow.web.app/privacidade) disponíveis no rodapé do login.
+Autenticação por JWT e autorização por papel: telas administrativas exigem `ADMIN` e a tela operacional exige `ATTENDANT`.
+
+Senhas armazenadas apenas como hash. A conta administrativa é provisionada internamente pelo bootstrap do backend, sem credencial pública.
+
+Totem e display são públicos por design e não coletam dados pessoais dos clientes atendidos.
+
+Páginas de [Termos de Uso](https://oenzoa-queueflow.web.app/termos) e [Política de Privacidade](https://oenzoa-queueflow.web.app/privacidade) disponíveis no rodapé do login.
 
 ## Testes
 
-- Backend: testes automatizados (integração e política de chamada de senhas) executados com `./mvnw test` e validados no CI a cada push.
-- Frontend: validado por build no CI (sem testes automatizados).
+Backend: testes automatizados (integração e política de chamada de senhas) executados com `./mvnw test` e validados no CI a cada push.
+
+Frontend: validado por build no CI (sem testes automatizados).
 
 ## Deploy
 
-- Frontend (produção): https://oenzoa-queueflow.web.app (Firebase Hosting, deploy via GitHub Actions)
-- Backend (produção): https://queueflow-backend-oe.azurewebsites.net (Azure App Service B1, container GHCR, Always On + WebSockets)
-- Banco de dados: PostgreSQL gerenciado no Aiven (preservado na migração Render → Azure).
-- `render.yaml` e `DEPLOY.md` são legados da hospedagem anterior no Render.
+Frontend (produção): https://oenzoa-queueflow.web.app (Firebase Hosting, deploy via GitHub Actions).
+
+Backend (produção): https://queueflow-backend-oe.azurewebsites.net (Azure App Service B1, container GHCR, Always On + WebSockets).
+
+Banco de dados: PostgreSQL gerenciado no Aiven (preservado na migração Render → Azure).
+
+`render.yaml` e `DEPLOY.md` são legados da hospedagem anterior no Render.
 
 ## Status
 
@@ -122,9 +138,11 @@ Versão estável publicada e em produção nos links acima.
 
 ## Limitações conhecidas
 
-- A demonstração roda em infraestrutura gratuita: os serviços hibernam após inatividade (primeiro acesso fica lento) e os dados podem ser redefinidos.
-- O projeto atende a um único estabelecimento por instância.
-- O frontend não possui testes automatizados; é validado por build no CI.
+A demonstração roda em infraestrutura gratuita: os serviços hibernam após inatividade (primeiro acesso fica lento) e os dados podem ser redefinidos.
+
+O projeto atende a um único estabelecimento por instância.
+
+O frontend não possui testes automatizados. É validado por build no CI.
 
 ## Autor
 
