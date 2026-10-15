@@ -8,7 +8,7 @@ O projeto separa frontend e backend (React/TypeScript na interface e API Java/Sp
 
 **Frontend (produção):** https://oenzoa-queueflow.web.app
 
-> Para uso normal, compartilhe apenas o link acima. O backend é um serviço técnico utilizado pelo frontend. A demo roda em infraestrutura gratuita e os dados podem ser redefinidos.
+> O link acima abre o frontend. A API é utilizada pela interface e roda separadamente no Azure App Service. Os dados da demonstração podem ser redefinidos.
 
 **Conta demo (atendente):** `demo@queueflow.app` / `Demo@2026`
 
@@ -60,7 +60,6 @@ queueflow/
 ├── frontend/         Aplicação React + TypeScript (Vite)
 ├── docker-compose.yml
 ├── Dockerfile
-├── render.yaml
 ├── netlify.toml
 └── DEPLOY.md
 ```
@@ -91,7 +90,7 @@ SPRING_PROFILES_ACTIVE=local ./mvnw spring-boot:run
 cd ../frontend && npm install && npm run dev
 ```
 
-Detalhes de publicação e ambientes: [`DEPLOY.md`](DEPLOY.md).
+Configuração atual de hospedagem na seção [Deploy](#deploy). O arquivo [`DEPLOY.md`](DEPLOY.md) registra o ambiente antigo no Render.
 
 ## Variáveis de ambiente
 
@@ -130,7 +129,7 @@ Backend (produção): https://queueflow-backend-oe.azurewebsites.net (Azure App 
 
 Banco de dados: PostgreSQL gerenciado no Aiven (preservado na migração Render → Azure).
 
-`render.yaml` e `DEPLOY.md` são legados da hospedagem anterior no Render.
+O arquivo [`DEPLOY.md`](DEPLOY.md) preserva as instruções do ambiente anterior no Render. O antigo `render.yaml` foi removido da árvore atual e pode ser consultado no histórico do Git. O plano de Cloud Run em `docs/cloudrun-deploy.md` também é histórico e não descreve a hospedagem atual.
 
 ## Status
 
@@ -138,7 +137,7 @@ Versão estável publicada e em produção nos links acima.
 
 ## Limitações conhecidas
 
-A demonstração roda em infraestrutura gratuita: os serviços hibernam após inatividade (primeiro acesso fica lento) e os dados podem ser redefinidos.
+O backend está documentado em Azure App Service B1 com Always On. O aviso de hibernação por inatividade do antigo plano gratuito do Render não se aplica a essa configuração. Reinícios ou novas publicações ainda podem exigir a reconexão do WebSocket. Os dados da demonstração podem ser redefinidos.
 
 O projeto atende a um único estabelecimento por instância.
 
