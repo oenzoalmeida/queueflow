@@ -24,7 +24,7 @@ app:
     cookie-secure: true
     cookie-same-site: None
   cors:
-    allowed-origins: ${FRONTEND_URL}
+    allowed-origins: ${FRONTEND_URL:http://localhost:5173}
 
 queueflow:
   bootstrap:
