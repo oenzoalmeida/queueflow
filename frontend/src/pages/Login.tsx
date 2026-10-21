@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { useAuth } from '../auth'
+import { usePageTitle } from '../usePageTitle'
 
 export default function Login() {
   const { login, user } = useAuth()
