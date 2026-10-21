@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api } from '../api/client'
 import { subscribe } from '../ws'
 import type { TicketDTO } from '../types'
+import { usePageTitle } from '../usePageTitle'
 
 interface DashboardData {
   issuedToday: number

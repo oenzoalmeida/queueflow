@@ -1,3 +1,4 @@
+import { usePageTitle } from '../usePageTitle'
 export default function Privacidade() {
   return (
     <main className="legal-page">

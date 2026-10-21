@@ -13,6 +13,7 @@ import Display from './pages/Display'
 import Termos from './pages/Termos'
 import Privacidade from './pages/Privacidade'
 import AdminLayout from './components/AdminLayout'
+import NotFound from './pages/NotFound'
 
 function RequireRole({ role, children }: { role: 'ADMIN' | 'ATTENDANT' | 'ANY'; children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -51,7 +52,7 @@ export default function App() {
       <Route path="/display" element={<Display />} />
       <Route path="/termos" element={<Termos />} />
       <Route path="/privacidade" element={<Privacidade />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   )
 }
