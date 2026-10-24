@@ -3,6 +3,7 @@ import { api } from '../api/client'
 import { subscribe } from '../ws'
 import { useCallSound } from '../sound'
 import type { TicketDTO } from '../types'
+import { usePageTitle } from '../usePageTitle'
 
 interface DisplayState {
   highlight: TicketDTO | null

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api, errMessage } from '../api/client'
+import { usePageTitle } from '../usePageTitle'
 
 export default function Settings() {
   const [value, setValue] = useState<number>(2)

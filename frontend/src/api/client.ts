@@ -8,7 +8,7 @@ export interface LoggedUser {
 }
 
 // In dev, VITE_API_URL is unset and requests go through the Vite proxy (relative '/api').
-// In production, set VITE_API_URL to the deployed backend's origin (e.g. https://queueflow-backend.onrender.com).
+// In production, set VITE_API_URL to the deployed backend's origin (e.g. https://queueflow-backend-oe.azurewebsites.net).
 const apiBase = import.meta.env.VITE_API_URL ?? ''
 
 export const api = axios.create({
