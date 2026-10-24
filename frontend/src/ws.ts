@@ -2,6 +2,7 @@ import SockJS from 'sockjs-client'
 import { Client, type Message } from '@stomp/stompjs'
 
 let client: Client | null = null
+const pending: Set<(c: Client) => void> = new Set()
 
 // Derived from VITE_API_URL by default (same backend, no separate config needed).
 // VITE_WS_URL can override this for setups where the WS endpoint lives elsewhere.
@@ -15,6 +16,10 @@ function getClient(): Client {
       webSocketFactory: () => new SockJS(`${wsBase}/ws`),
       reconnectDelay: 3000,
       onStompError: console.warn,
+      onConnect: () => {
+        // Resubscribe everything on (re)connect; each subscriber unsubscribes itself.
+        for (const attach of pending) attach(client!)
+      },
     })
   }
   return client
@@ -24,8 +29,9 @@ function getClient(): Client {
 export function subscribe(topic: string, cb: (body: any) => void): () => void {
   const c = getClient()
   let sub: { unsubscribe: () => void } | null = null
-  c.onConnect = () => {
-    sub = c.subscribe(topic, (m: Message) => {
+  const attach = (conn: Client) => {
+    sub?.unsubscribe()
+    sub = conn.subscribe(topic, (m: Message) => {
       try {
         cb(JSON.parse(m.body))
       } catch {
@@ -33,8 +39,11 @@ export function subscribe(topic: string, cb: (body: any) => void): () => void {
       }
     })
   }
-  c.activate()
+  pending.add(attach)
+  if (c.connected) attach(c)
+  else c.activate()
   return () => {
+    pending.delete(attach)
     try {
       sub?.unsubscribe()
     } catch {
