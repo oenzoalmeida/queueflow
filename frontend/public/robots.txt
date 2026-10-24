@@ -1,0 +1,14 @@
+# QueueFlow
+# O frontend público inclui totem (/totem), display (/display) e páginas legais.
+# Áreas autenticadas (admin/atendente) não devem ser indexadas.
+
+User-agent: *
+Disallow: /dashboard
+Disallow: /queues
+Disallow: /counters
+Disallow: /attendants
+Disallow: /attendant
+Disallow: /history
+Disallow: /settings
+Disallow: /login
+Disallow: /api/

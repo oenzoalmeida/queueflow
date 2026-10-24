@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api, errMessage } from '../api/client'
 import type { UserDTO } from '../types'
+import { usePageTitle } from '../usePageTitle'
 
 export default function Attendants() {
   const [users, setUsers] = useState<UserDTO[]>([])
