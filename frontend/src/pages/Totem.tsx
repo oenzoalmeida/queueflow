@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ArrowLeft, Printer } from 'lucide-react'
 import { api } from '../api/client'
+import { usePageTitle } from '../usePageTitle'
 
 interface PubQueue { id: number; name: string; prefix: string }
 interface Issued {
