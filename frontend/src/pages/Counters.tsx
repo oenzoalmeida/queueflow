@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api, errMessage } from '../api/client'
 import type { CounterDTO } from '../types'
+import { usePageTitle } from '../usePageTitle'
 
 export default function Counters() {
   const [counters, setCounters] = useState<CounterDTO[]>([])

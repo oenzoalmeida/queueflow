@@ -3,6 +3,7 @@ import { api, errMessage } from '../api/client'
 import { useAuth } from '../auth'
 import { subscribe } from '../ws'
 import type { CounterDTO, TicketDTO } from '../types'
+import { usePageTitle } from '../usePageTitle'
 
 interface StateResp { current: TicketDTO | null; waiting: number }
 

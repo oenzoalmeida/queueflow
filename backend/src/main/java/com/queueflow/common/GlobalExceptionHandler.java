@@ -32,6 +32,16 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.UNPROCESSABLE_ENTITY, "Dados inválidos.", Map.of("fields", fields));
     }
 
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<Map<String, Object>> notFound(org.springframework.web.servlet.resource.NoResourceFoundException ex) {
+        return build(HttpStatus.NOT_FOUND, "Recurso não encontrado.", Map.of());
+    }
+
+    @ExceptionHandler(org.springframework.web.HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<Map<String, Object>> methodNotAllowed(org.springframework.web.HttpRequestMethodNotSupportedException ex) {
+        return build(HttpStatus.METHOD_NOT_ALLOWED, "Método HTTP não suportado para este recurso.", Map.of());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> generic(Exception ex) {
         log.error("Unhandled exception", ex);

@@ -1,3 +1,5 @@
+> **LEGADO:** este guia descreve o deploy antigo no Render. A produção atual é Firebase Hosting (frontend) + Azure App Service (backend). Mantido apenas como referência histórica.
+
 # Deploy — QueueFlow
 
 Architecture: **Netlify** (frontend) + **Render** (backend + PostgreSQL).
