@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api/client'
 import { STATUS_LABEL, type QueueDTO, type TicketDTO, type UserDTO } from '../types'
+import { usePageTitle } from '../usePageTitle'
 
 interface Row { ticket: TicketDTO; waitMinutes: number | null; serviceMinutes: number | null; totalMinutes: number | null }
 

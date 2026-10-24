@@ -1,3 +1,4 @@
+import { usePageTitle } from '../usePageTitle'
 export default function Termos() {
   return (
     <main className="legal-page">
