@@ -110,6 +110,16 @@ class FlowIT {
     @Test
     @Order(2)
     void adminEndpoints_rolesAndDuplicates() {
+        // Rotas de gestão devem negar acesso sem sessão e com papel ATTENDANT.
+        for (String endpoint : List.of("/api/queues", "/api/users", "/api/history",
+                "/api/dashboard/today", "/api/settings")) {
+            assertEquals(HttpStatus.UNAUTHORIZED,
+                    exchange(HttpMethod.GET, endpoint, null, null).getStatusCode(),
+                    "anonymous access to " + endpoint);
+            assertEquals(HttpStatus.FORBIDDEN,
+                    exchange(HttpMethod.GET, endpoint, null, att1Session).getStatusCode(),
+                    "attendant access to " + endpoint);
+        }
         assertEquals(HttpStatus.FORBIDDEN,
                 post("/api/queues", Map.of("name", "X", "prefix", "X"), att1Session).getStatusCode());
 
