@@ -14,6 +14,16 @@ O projeto separa frontend e backend (React/TypeScript na interface e API Java/Sp
 
 O acesso administrativo é provisionado internamente via bootstrap do backend (variáveis `QUEUEFLOW_BOOTSTRAP_*`) e não possui credencial pública.
 
+## Telas
+
+Totem público de retirada de senhas:
+
+![Totem de retirada de senhas](docs/screenshots/queueflow-totem.png)
+
+Painel público de acompanhamento das chamadas:
+
+![Painel de chamadas](docs/screenshots/queueflow-display.png)
+
 ## Sobre o projeto
 
 O QueueFlow foi desenvolvido para organizar o fluxo de atendimento de estabelecimentos, permitindo controlar senhas, guichês e o andamento da fila por meio de uma aplicação web, com atualização em tempo real entre as telas.
