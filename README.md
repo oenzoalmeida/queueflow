@@ -20,7 +20,7 @@ Totem público de retirada de senhas:
 
 ![Totem de retirada de senhas](docs/screenshots/queueflow-totem.png)
 
-Painel público de acompanhamento das chamadas:
+Painel público de acompanhamento das chamadas (captura de execução local descartável com senhas reais emitidas e chamadas; nenhum dado de produção):
 
 ![Painel de chamadas](docs/screenshots/queueflow-display.png)
 
