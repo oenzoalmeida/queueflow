@@ -50,8 +50,9 @@ public class CounterController {
     }
 
     @PutMapping("/{id}")
+    @Transactional
     public CounterDTO update(@PathVariable Long id, @Valid @RequestBody CounterReq req) {
-        Counter c = counters.findById(id).orElseThrow(() -> new ApiException.NotFound("Guichê não encontrado."));
+        Counter c = counters.findByIdForUpdate(id).orElseThrow(() -> new ApiException.NotFound("Guichê não encontrado."));
         var same = counters.findByNameIgnoreCase(req.name().trim());
         if (same.isPresent() && !same.get().getId().equals(id))
             throw new ApiException(HttpStatus.CONFLICT, "Já existe um guichê com esse nome.");
@@ -64,13 +65,15 @@ public class CounterController {
     @PostMapping("/{id}/claim")
     @Transactional
     public Map<String, Object> claim(@PathVariable Long id, @AuthenticationPrincipal AuthUser user) {
-        Counter target = counters.findById(id).orElseThrow(() -> new ApiException.NotFound("Guichê não encontrado."));
+        List<Counter> locked = counters.findAllForOwnershipUpdate();
+        Counter target = locked.stream().filter(c -> c.getId().equals(id)).findFirst()
+                .orElseThrow(() -> new ApiException.NotFound("Guichê não encontrado."));
         User me = users.findById(user.id()).orElseThrow();
         if (!target.isActive()) throw new ApiException.Rule("Guichê inativo.");
         if (target.getCurrentAttendant() != null && !target.getCurrentAttendant().getId().equals(me.getId()))
             throw new ApiException.Rule("Guichê ocupado por outro atendente.");
         // release any counter previously claimed by me
-        for (Counter mine : counters.findAll()) {
+        for (Counter mine : locked) {
             if (mine.getCurrentAttendant() != null && mine.getCurrentAttendant().getId().equals(me.getId())
                     && !mine.getId().equals(target.getId())) {
                 mine.setCurrentAttendant(null);
@@ -85,7 +88,7 @@ public class CounterController {
     @Transactional
     public Map<String, Object> release(@AuthenticationPrincipal AuthUser user) {
         User me = users.findById(user.id()).orElseThrow();
-        for (Counter c : counters.findAll()) {
+        for (Counter c : counters.findAllForOwnershipUpdate()) {
             if (c.getCurrentAttendant() != null && c.getCurrentAttendant().getId().equals(me.getId()))
                 c.setCurrentAttendant(null);
         }
