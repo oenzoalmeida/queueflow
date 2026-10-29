@@ -119,7 +119,7 @@ Páginas de [Termos de Uso](https://oenzoa-queueflow.web.app/termos) e [Polític
 
 Backend: testes automatizados (integração e política de chamada de senhas) executados com `./mvnw test` e validados no CI a cada push.
 
-Frontend: validado por build no CI (sem testes automatizados).
+Frontend: testes automatizados com Vitest + Testing Library (`npm test` em `frontend/`), cobrindo formatação de erros da API, rótulos de status e o fluxo de login; build também validado no CI.
 
 ## Deploy
 
@@ -141,7 +141,7 @@ O backend está documentado em Azure App Service B1 com Always On. O aviso de hi
 
 O projeto atende a um único estabelecimento por instância.
 
-O frontend não possui testes automatizados. É validado por build no CI.
+O frontend possui testes automatizados (Vitest + Testing Library) executados no CI, além da validação de build.
 
 ## Autor
 
