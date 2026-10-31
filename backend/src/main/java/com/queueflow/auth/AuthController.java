@@ -46,9 +46,12 @@ public class AuthController {
             @NotBlank @Email(message = "Email inválido") String email,
             @NotBlank @Size(min = 6, max = 72, message = "A senha deve ter entre 6 e 72 caracteres") String password) {}
     public record LoginReq(@NotBlank @Email String email, @NotBlank String password) {}
-    public record LoginResp(Long id, String name, String email, String role) {
-        public static LoginResp of(User u) { return new LoginResp(u.getId(), u.getName(), u.getEmail(), u.getRole().name()); }
+    public record LoginResp(Long id, String name, String email, String role, boolean mustChangePassword) {
+        public static LoginResp of(User u) { return new LoginResp(u.getId(), u.getName(), u.getEmail(), u.getRole().name(), u.isMustChangePassword()); }
     }
+    public record ChangePasswordReq(
+            @NotBlank(message = "Informe a senha atual") String currentPassword,
+            @NotBlank @Size(min = 6, max = 72, message = "A nova senha deve ter entre 6 e 72 caracteres") String newPassword) {}
 
     @PostMapping("/register")
     public ResponseEntity<LoginResp> register(@RequestBody RegisterReq req) {
@@ -91,10 +94,22 @@ public class AuthController {
         return ResponseEntity.noContent().header(HttpHeaders.SET_COOKIE, cookie.toString()).build();
     }
 
+    @PostMapping("/change-password")
+    public ResponseEntity<LoginResp> changePassword(@jakarta.validation.Valid @RequestBody ChangePasswordReq req, java.security.Principal principal) {
+        AuthUser au = (AuthUser) ((org.springframework.security.core.Authentication) principal).getPrincipal();
+        User user = users.findById(au.id())
+                .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Sessão inválida."));
+        if (!encoder.matches(req.currentPassword(), user.getPasswordHash())) throw new BadCredentialsException("Senha atual incorreta.");
+        if (req.currentPassword().equals(req.newPassword())) throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, "A nova senha deve ser diferente da senha atual.");
+        user.setPasswordHash(encoder.encode(req.newPassword()));
+        user.setMustChangePassword(false);
+        return authenticated(users.save(user));
+    }
+
     @GetMapping("/me")
     public Map<String, Object> me(java.security.Principal principal) {
         AuthUser au = (AuthUser) ((org.springframework.security.core.Authentication) principal).getPrincipal();
-        return Map.of("id", au.id(), "name", au.name(), "email", au.email(), "role", au.role().name());
+        return Map.of("id", au.id(), "name", au.name(), "email", au.email(), "role", au.role().name(), "mustChangePassword", au.mustChangePassword());
     }
 
     private ResponseEntity<LoginResp> authenticated(User user) {

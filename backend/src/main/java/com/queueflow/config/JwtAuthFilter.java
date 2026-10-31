@@ -35,9 +35,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             if (token != null) {
                 var claims = jwtService.parse(token);
                 if (claims != null) {
-                    userRepository.findByEmailIgnoreCase(claims.getSubject()).ifPresent(user -> {
-                        if (user.isActive()) authenticate(user);
-                    });
+                    var userOpt = userRepository.findByEmailIgnoreCase(claims.getSubject());
+                    if (userOpt.isPresent()) {
+                        User user = userOpt.get();
+                        if (user.isActive()) {
+                            if (user.isMustChangePassword() && !isPasswordChangePath(req)) {
+                                writePasswordChangeRequired(res);
+                                return;
+                            }
+                            authenticate(user);
+                        }
+                    }
                 }
             }
         }
@@ -62,12 +70,27 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     public static void authenticate(User user) {
         var auth = new UsernamePasswordAuthenticationToken(
-                new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getRole()),
+                new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getRole(), user.isMustChangePassword()),
                 null, List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole())));
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
-    public record AuthUser(Long id, String name, String email, User.Role role) {
+    // a user provisioned with a temporary password may only reach the change flow, /me and logout until the flag clears
+    private static boolean isPasswordChangePath(HttpServletRequest req) {
+        String path = req.getRequestURI();
+        return path.equals("/api/auth/change-password")
+                || path.equals("/api/auth/me")
+                || path.equals("/api/auth/logout");
+    }
+
+    private static void writePasswordChangeRequired(HttpServletResponse res) throws IOException {
+        if (res.isCommitted()) return;
+        res.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        res.setContentType("application/json;charset=UTF-8");
+        res.getWriter().write("{\"status\":403,\"code\":\"PASSWORD_CHANGE_REQUIRED\",\"message\":\"Troca de senha obrigatória no primeiro acesso.\"}");
+    }
+
+    public record AuthUser(Long id, String name, String email, User.Role role, boolean mustChangePassword) {
         public boolean isAdmin() { return role == User.Role.ADMIN; }
     }
 }
