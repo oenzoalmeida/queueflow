@@ -47,4 +47,4 @@ jobs:
         # o token de acesso emitido pela SA é o caminho suportado em CI.
         env:
           GOOGLE_OAUTH_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
-        run: npx --yes firebase-tools@latest deploy --only hosting --project oenzoa-queueflow --non-interactive 
+        run: npx --yes firebase-tools@15.34.0 deploy --only hosting --project oenzoa-queueflow --non-interactive 
