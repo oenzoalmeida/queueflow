@@ -51,6 +51,7 @@ public class BootstrapDataRunner implements CommandLineRunner {
     public void run(String... args) {
         validateCredentials();
 
+        // the bootstrap password is a temporary credential: the admin must replace it at first login
         User admin = users.findByEmailIgnoreCase(adminEmail).orElseGet(() ->
                 users.save(User.builder()
                         .name("Admin Demo")
@@ -58,10 +59,12 @@ public class BootstrapDataRunner implements CommandLineRunner {
                         .passwordHash(encoder.encode(adminPassword))
                         .role(User.Role.ADMIN)
                         .active(true)
+                        .mustChangePassword(true)
                         .createdAt(Instant.now())
                         .build()));
         if (!encoder.matches(adminPassword, admin.getPasswordHash())) {
             admin.setPasswordHash(encoder.encode(adminPassword));
+            admin.setMustChangePassword(true);
             users.save(admin);
             log.info("QueueFlow bootstrap synced admin demo password from environment");
         }

@@ -5,6 +5,7 @@ export interface LoggedUser {
   name: string
   email: string
   role: 'ADMIN' | 'ATTENDANT'
+  mustChangePassword: boolean
 }
 
 // In dev, VITE_API_URL is unset and requests go through the Vite proxy (relative '/api').

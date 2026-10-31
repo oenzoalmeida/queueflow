@@ -11,7 +11,7 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  if (user) return <Navigate to={user.role === 'ATTENDANT' ? '/attendant' : '/dashboard'} replace />
+  if (user) return <Navigate to={user.mustChangePassword ? '/trocar-senha' : user.role === 'ATTENDANT' ? '/attendant' : '/dashboard'} replace />
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,7 +19,7 @@ export default function Login() {
     setLoading(true)
     try {
       const u = await login(email.trim(), password)
-      nav(u.role === 'ATTENDANT' ? '/attendant' : '/dashboard', { replace: true })
+      nav(u.mustChangePassword ? '/trocar-senha' : u.role === 'ATTENDANT' ? '/attendant' : '/dashboard', { replace: true })
     } catch (err) {
       setError((err as Error).message)
     } finally {

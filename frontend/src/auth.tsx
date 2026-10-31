@@ -5,6 +5,7 @@ interface AuthCtx {
   user: LoggedUser | null
   loading: boolean
   login: (email: string, password: string) => Promise<LoggedUser>
+  changePassword: (currentPassword: string, newPassword: string) => Promise<LoggedUser>
   logout: () => Promise<void>
 }
 
@@ -43,6 +44,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const changePassword = async (currentPassword: string, newPassword: string) => {
+    try {
+      const { data } = await api.post<LoggedUser>('/auth/change-password', { currentPassword, newPassword })
+      setUser(data)
+      return data
+    } catch (e) {
+      throw new Error(errMessage(e))
+    }
+  }
+
   const logout = async () => {
     try {
       await api.post('/auth/logout')
@@ -52,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  return <Ctx.Provider value={{ user, loading, login, logout }}>{children}</Ctx.Provider>
+  return <Ctx.Provider value={{ user, loading, login, changePassword, logout }}>{children}</Ctx.Provider>
 }
 
 export const useAuth = () => useContext(Ctx)

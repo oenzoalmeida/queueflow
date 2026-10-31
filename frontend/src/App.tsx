@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from './auth'
 import Login from './pages/Login'
+import ChangePassword from './pages/ChangePassword'
 import Dashboard from './pages/Dashboard'
 import Queues from './pages/Queues'
 import Counters from './pages/Counters'
@@ -19,6 +20,7 @@ function RequireRole({ role, children }: { role: 'ADMIN' | 'ATTENDANT' | 'ANY'; 
   const { user, loading } = useAuth()
   if (loading) return <div className="page-loading">Carregando…</div>
   if (!user) return <Navigate to="/login" replace />
+  if (user.mustChangePassword) return <Navigate to="/trocar-senha" replace />
   if (role === 'ADMIN' && user.role !== 'ADMIN') return <Navigate to="/attendant" replace />
   return <>{children}</>
 }
@@ -29,6 +31,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={loading ? <div className="page-loading">Carregando…</div> : <Navigate to={user?.role === 'ATTENDANT' ? '/attendant' : user ? '/dashboard' : '/login'} replace />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/trocar-senha" element={<ChangePassword />} />
 
       <Route element={<RequireRole role="ADMIN"><AdminLayout /></RequireRole>}>
         <Route path="/dashboard" element={<Dashboard />} />
