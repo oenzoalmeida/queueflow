@@ -44,7 +44,7 @@ export default function Attendants() {
 
   return (
     <>
-      <h2>Atendentes</h2>
+      <h1>Atendentes</h1>
       <section className="card">
         <h3>Novo atendente</h3>
         {error && <div className="alert error">{error}</div>}

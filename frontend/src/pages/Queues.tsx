@@ -39,7 +39,7 @@ export default function Queues() {
 
   return (
     <>
-      <h2>Filas</h2>
+      <h1>Filas</h1>
       <section className="card">
         <h3>{editing ? 'Editar fila' : 'Nova fila'}</h3>
         {error && <div className="alert error">{error}</div>}

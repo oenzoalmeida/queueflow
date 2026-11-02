@@ -44,7 +44,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <h2>Dashboard</h2>
+      <h1>Dashboard</h1>
       <div className="stat-grid">
         <StatCard label="Senhas hoje" value={data.issuedToday} />
         <StatCard label="Atendimentos concluídos" value={data.finishedToday} />

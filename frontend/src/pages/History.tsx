@@ -44,7 +44,7 @@ export default function History() {
 
   return (
     <>
-      <h2>Histórico</h2>
+      <h1>Histórico</h1>
       <section className="card">
         <form className="filter-form" onSubmit={submit}>
           <label>Data <input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></label>

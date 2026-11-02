@@ -34,7 +34,7 @@ export default function Counters() {
 
   return (
     <>
-      <h2>Guichês</h2>
+      <h1>Guichês</h1>
       <section className="card">
         <h3>{editing ? 'Editar guichê' : 'Novo guichê'}</h3>
         {error && <div className="alert error">{error}</div>}
