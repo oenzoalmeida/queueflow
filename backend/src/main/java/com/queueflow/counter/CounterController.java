@@ -26,7 +26,7 @@ public class CounterController {
     private final UserRepository users;
 
     public record CounterReq(@NotBlank(message = "Informe o nome do guichê") @Size(max = 80) String name,
-                             boolean active) {}
+                             Boolean active) {}
 
     public record CounterDTO(Long id, String name, boolean active, String currentAttendantName) {}
 
@@ -57,7 +57,7 @@ public class CounterController {
         if (same.isPresent() && !same.get().getId().equals(id))
             throw new ApiException(HttpStatus.CONFLICT, "Já existe um guichê com esse nome.");
         c.setName(req.name().trim());
-        c.setActive(req.active());
+        c.setActive(Boolean.TRUE.equals(req.active()));
         return dto(counters.save(c));
     }
 
