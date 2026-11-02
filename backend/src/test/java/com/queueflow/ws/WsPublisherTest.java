@@ -42,7 +42,7 @@ class WsPublisherTest {
 
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Map<String, Object>> msg = ArgumentCaptor.forClass((Class<Map<String, Object>>) (Class<?>) Map.class);
-        verify(template).convertAndSend(eq("/topic/display"), msg.capture());
+        verify(template).convertAndSend(eq("/topic/display"), (Object) msg.capture());
         Map<String, Object> envelope = msg.getValue();
         assertEquals("TICKET_ISSUED", envelope.get("type"));
         assertEquals(Map.of("displayCode", "A001"), envelope.get("payload"));
@@ -51,7 +51,7 @@ class WsPublisherTest {
     @Test
     void attendantSendsToAttendantTopic() {
         new WsPublisher(template).attendant(Map.of("waiting", 3));
-        verify(template).convertAndSend(eq("/topic/attendant"), anyMap());
+        verify(template).convertAndSend(eq("/topic/attendant"), (Object) anyMap());
     }
 
     @Test
@@ -63,17 +63,17 @@ class WsPublisherTest {
         publisher.display("TICKET_CALLED", Map.of("ticket", "P001"));
 
         // registered but NOT delivered yet
-        verify(template, never()).convertAndSend(anyString(), anyMap());
+        verify(template, never()).convertAndSend(anyString(), (Object) anyMap());
         List<TransactionSynchronization> syncs = TransactionSynchronizationManager.getSynchronizations();
         assertEquals(1, syncs.size());
 
         syncs.get(0).afterCommit();
-        verify(template).convertAndSend(eq("/topic/display"), anyMap());
+        verify(template).convertAndSend(eq("/topic/display"), (Object) anyMap());
     }
 
     @Test
     void wsFailureNeverPropagates() {
-        doThrow(new IllegalStateException("broker down")).when(template).convertAndSend(anyString(), anyMap());
+        doThrow(new IllegalStateException("broker down")).when(template).convertAndSend(anyString(), (Object) anyMap());
         assertDoesNotThrow(() -> new WsPublisher(template).display("TICKET_FINISHED", Map.of()));
     }
 }
