@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '../api/client'
-import { subscribe } from '../ws'
+import { subscribe, subscribeStatus } from '../ws'
 import { useCallSound } from '../sound'
 import type { TicketDTO } from '../types'
 import { usePageTitle } from '../usePageTitle'
@@ -18,12 +18,14 @@ async function fetchState(): Promise<DisplayState> {
 export default function Display() {
   const [state, setState] = useState<DisplayState>({ highlight: null, lastCalls: [], waiting: 0 })
   const [connected, setConnected] = useState(false)
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
   const lastCalledId = useRef<number | null>(null)
   const sound = useCallSound()
 
   const refresh = useCallback(async () => {
     try {
       setState(await fetchState())
+      setLastUpdate(new Date())
     } catch {
       /* keeps last known state on TV */
     }
@@ -31,8 +33,15 @@ export default function Display() {
 
   useEffect(() => {
     refresh()
+    const unsubStatus = subscribeStatus((wsStatus) => {
+      const up = wsStatus === 'connected'
+      setConnected(up)
+      // Resync the snapshot whenever the socket (re)connects: while disconnected the
+      // TV kept the last known state, so a fresh GET realigns it without duplicating
+      // events (the GET is idempotent; only WS messages were at risk of being missed).
+      if (up) void refresh()
+    })
     const unsub = subscribe('/topic/display', (msg: { type: string; payload?: { ticket?: TicketDTO } }) => {
-      setConnected(true)
       if (['TICKET_CALLED', 'TICKET_RECALLED'].includes(msg.type) && msg.payload?.ticket) {
         const t = msg.payload.ticket
         if (t.id !== lastCalledId.current) {
@@ -50,20 +59,35 @@ export default function Display() {
       }
       void refresh()
     })
-    return unsub
+    return () => {
+      unsub()
+      unsubStatus()
+    }
   }, [refresh, sound])
 
   return (
     <div className="display-page">
       <header className="display-top">
         <span className="brand-mini">QueueFlow</span>
-        {!sound.enabled ? (
-          <button className="sound-btn" onClick={sound.enable} title="Ativar som de chamada">
-            🔇 Ativar som
-          </button>
-        ) : (
-          <span className={`ws-dot ${connected ? 'on' : ''}`} title={connected ? 'Tempo real ativo' : 'Conectando…'} />
-        )}
+        <span className="display-top-right">
+          {!sound.enabled && (
+            <button className="sound-btn" onClick={sound.enable} title="Ativar som de chamada">
+              🔇 Ativar som
+            </button>
+          )}
+          <span className="ws-status">
+            {!connected && <span className="ws-off">Sem conexão · </span>}
+            {lastUpdate && (
+              <span className="ws-last">
+                Atualizado {lastUpdate.toLocaleTimeString('pt-BR')}
+              </span>
+            )}
+            <span
+              className={`ws-dot ${connected ? 'on' : ''}`}
+              title={connected ? 'Tempo real ativo' : 'Reconectando…'}
+            />
+          </span>
+        </span>
       </header>
 
       <section className="display-highlight">
