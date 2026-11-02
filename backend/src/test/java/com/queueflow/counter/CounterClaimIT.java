@@ -42,7 +42,7 @@ class CounterClaimIT {
         counters.deleteAllById(List.of(a.getId(), b.getId()));
         users.deleteAllById(List.of(first.getId(), second.getId()));
     }
-    AuthUser auth(User u) { return new AuthUser(u.getId(), u.getName(), u.getEmail(), u.getRole()); }
+    AuthUser auth(User u) { return new AuthUser(u.getId(), u.getName(), u.getEmail(), u.getRole(), false); }
     boolean claim(Long counter, User user) {
         try { controller.claim(counter, auth(user)); return true; }
         catch (ApiException.Rule e) { return false; }
