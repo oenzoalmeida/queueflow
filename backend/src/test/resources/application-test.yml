@@ -16,3 +16,7 @@ app:
     expiration-ms: 86400000
   cors:
     allowed-origins: http://localhost:5173
+  ratelimit:
+    # httpclient5 (que reexecutava 429 via Retry-After) saiu do classpath de teste no Boot 4;
+    # o filtro segue coberto por RateLimitFilterTest.
+    enabled: false
