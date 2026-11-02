@@ -1,11 +1,13 @@
 package com.queueflow.it;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.http.*;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -20,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * /api/auth/logout and /api/auth/change-password until the flag clears.
  * Runs against real PostgreSQL (queueflow_test on :5433) and cleans up its own rows.
  */
+@AutoConfigureTestRestTemplate
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -103,7 +106,7 @@ class ForcedChangeIT {
     @Order(4)
     void changePasswordRejectsSameAsCurrent_flagStays() {
         var r = post("/api/auth/change-password", Map.of("currentPassword", TEMP, "newPassword", TEMP), session);
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, r.getStatusCode());
+        assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, r.getStatusCode());
 
         var me = get("/api/auth/me", session);
         assertTrue(me.getBody().path("mustChangePassword").asBoolean(), "flag must survive a same-password attempt");
@@ -114,7 +117,7 @@ class ForcedChangeIT {
     @Order(5)
     void changePasswordRejectsWeak_flagStays() {
         var r = post("/api/auth/change-password", Map.of("currentPassword", TEMP, "newPassword", "123"), session);
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, r.getStatusCode(), "bean validation rejects a weak new password");
+        assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, r.getStatusCode(), "bean validation rejects a weak new password");
         assertTrue(get("/api/auth/me", session).getBody().path("mustChangePassword").asBoolean());
     }
 
