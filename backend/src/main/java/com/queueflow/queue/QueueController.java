@@ -24,7 +24,7 @@ public class QueueController {
     public record QueueReq(
             @NotBlank(message = "Informe o nome da fila") @Size(max = 120) String name,
             @NotBlank @Pattern(regexp = "^[A-Za-z]{1,3}$", message = "Prefixo deve ter 1 a 3 letras") String prefix,
-            boolean active) {}
+            Boolean active) {}
 
     public record QueueDTO(Long id, String name, String prefix, boolean active, Instant createdAt) {
         static QueueDTO of(Queue q) { return new QueueDTO(q.getId(), q.getName(), q.getPrefix(), q.isActive(), q.getCreatedAt()); }
@@ -55,7 +55,7 @@ public class QueueController {
             throw new ApiException(HttpStatus.CONFLICT, "Já existe uma fila com esse prefixo.");
         q.setName(req.name().trim());
         q.setPrefix(req.prefix().trim().toUpperCase());
-        q.setActive(req.active());
+        q.setActive(Boolean.TRUE.equals(req.active()));
         return QueueDTO.of(queues.save(q));
     }
 }
