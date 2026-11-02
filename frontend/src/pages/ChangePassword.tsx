@@ -43,7 +43,7 @@ export default function ChangePassword() {
         <label htmlFor="cp-current">Senha temporária</label>
         <input id="cp-current" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required autoFocus />
         <label htmlFor="cp-new">Nova senha</label>
-        <input id="cp-new" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} minLength={6} maxLength={72} required />
+        <input id="cp-new" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} minLength={12} maxLength={72} required />
         <label htmlFor="cp-confirm">Confirmar nova senha</label>
         <input id="cp-confirm" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
         <button className="btn primary" disabled={loading}>
