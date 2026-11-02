@@ -41,6 +41,7 @@ export default function Settings() {
         <form className="inline-form" onSubmit={save}>
           <input
             type="number" min={0} max={99} value={value}
+            aria-label="Atendimentos normais antes de chamar senha prioritária"
             onChange={(e) => setValue(Number(e.target.value))}
             style={{ maxWidth: 110 }}
           />
