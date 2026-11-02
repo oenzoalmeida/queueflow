@@ -140,7 +140,7 @@ class ForcedChangeIT {
     @Test
     @Order(7)
     void selfRegisteredUserHasNoFlag() {
-        var reg = post("/api/auth/register", Map.of("name", "Sem Flag", "email", OTHER, "password", "Secret1!"), null);
+        var reg = post("/api/auth/register", Map.of("name", "Sem Flag", "email", OTHER, "password", "Secret1!23456"), null);
         assertEquals(HttpStatus.OK, reg.getStatusCode());
         assertFalse(reg.getBody().path("mustChangePassword").asBoolean(), "self-register must not set the flag");
     }
