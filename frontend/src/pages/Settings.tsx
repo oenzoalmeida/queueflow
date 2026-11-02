@@ -28,7 +28,7 @@ export default function Settings() {
 
   return (
     <>
-      <h2>Configurações</h2>
+      <h1>Configurações</h1>
       <section className="card narrow">
         <h3>Regra de prioridade</h3>
         <p className="muted">
