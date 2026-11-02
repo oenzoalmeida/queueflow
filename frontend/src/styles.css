@@ -159,7 +159,7 @@ tr:hover td { background: #f8fafd; }
 .brand-mini { font-weight: 800; font-size: 20px; letter-spacing: 0.06em; color: #93c5fd; }
 .ws-dot { width: 14px; height: 14px; border-radius: 50%; background: #64748b; }
 .ws-dot.on { background: var(--green); box-shadow: 0 0 10px var(--green); }
-.sound-btn { background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.3); color: #fff; border-radius: 999px; padding: 8px 18px; font-size: 15px; cursor: pointer; }
+.sound-btn { white-space: nowrap; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.3); color: #fff; border-radius: 999px; padding: 8px 18px; font-size: 15px; cursor: pointer; }
 .display-highlight { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; }
 .display-code { font-size: clamp(110px, 24vw, 340px); font-weight: 800; line-height: 1; letter-spacing: 0.04em; color: #fff; }
 .display-counter { font-size: clamp(28px, 6vw, 72px); font-weight: 700; color: #93c5fd; text-transform: uppercase; letter-spacing: 0.08em; }
@@ -197,3 +197,8 @@ tr:hover td { background: #f8fafd; }
 .login-legal a { color: var(--primary-dark); }
 
 .admin-main h1 { font-size: 1.5em; }
+
+.ws-status { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: rgba(255, 255, 255, 0.75); }
+.ws-status .ws-off { color: #fbbf24; font-weight: 600; }
+.ws-status .ws-dot { flex: none; }
+.display-top-right { display: inline-flex; align-items: center; gap: 12px; }
