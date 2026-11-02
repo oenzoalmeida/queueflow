@@ -44,18 +44,20 @@ public class AuthController {
     public record RegisterReq(
             @NotBlank(message = "Informe o nome") String name,
             @NotBlank @Email(message = "Email inválido") String email,
-            @NotBlank @Size(min = 6, max = 72, message = "A senha deve ter entre 6 e 72 caracteres") String password) {}
+            @NotBlank @Size(min = 12, max = 72, message = "A senha deve ter entre 12 e 72 caracteres") String password) {}
     public record LoginReq(@NotBlank @Email String email, @NotBlank String password) {}
     public record LoginResp(Long id, String name, String email, String role, boolean mustChangePassword) {
         public static LoginResp of(User u) { return new LoginResp(u.getId(), u.getName(), u.getEmail(), u.getRole().name(), u.isMustChangePassword()); }
     }
     public record ChangePasswordReq(
             @NotBlank(message = "Informe a senha atual") String currentPassword,
-            @NotBlank @Size(min = 6, max = 72, message = "A nova senha deve ter entre 6 e 72 caracteres") String newPassword) {}
+            @NotBlank @Size(min = 12, max = 72, message = "A nova senha deve ter entre 12 e 72 caracteres") String newPassword) {}
 
     @PostMapping("/register")
-    public ResponseEntity<LoginResp> register(@RequestBody RegisterReq req) {
+    @org.springframework.transaction.annotation.Transactional
+    public ResponseEntity<LoginResp> register(@jakarta.validation.Valid @RequestBody RegisterReq req) {
         if (users.existsByEmailIgnoreCase(req.email().trim())) throw new ApiException(HttpStatus.CONFLICT, "Email já cadastrado.");
+        users.lockUserProvisioning(); // serializa a checagem de primeiro usuário
         boolean firstUser = users.count() == 0;
         User user = User.builder()
                 .name(req.name().trim())
@@ -103,6 +105,7 @@ public class AuthController {
         if (req.currentPassword().equals(req.newPassword())) throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, "A nova senha deve ser diferente da senha atual.");
         user.setPasswordHash(encoder.encode(req.newPassword()));
         user.setMustChangePassword(false);
+        user.setTokenVersion((user.getTokenVersion() == null ? 0 : user.getTokenVersion()) + 1); // revoga sessões anteriores
         return authenticated(users.save(user));
     }
 
@@ -113,7 +116,7 @@ public class AuthController {
     }
 
     private ResponseEntity<LoginResp> authenticated(User user) {
-        String token = jwt.generate(user.getEmail(), user.getRole().name());
+        String token = jwt.generate(user.getEmail(), user.getRole().name(), user.getTokenVersion());
         ResponseCookie cookie = ResponseCookie.from(SESSION_COOKIE, token)
                 .httpOnly(true)
                 .secure(cookieSecure)
