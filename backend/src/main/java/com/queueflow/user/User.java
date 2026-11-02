@@ -25,6 +25,10 @@ public class User {
     @Column(name = "must_change_password", nullable = false)
     @Builder.Default
     private boolean mustChangePassword = false;
+
+    /** Revogação de sessões: token com versão diferente não autentica (troca/reset de senha). */
+    @Builder.Default
+    private Integer tokenVersion = 0;
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 }

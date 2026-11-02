@@ -74,23 +74,23 @@ class FlowIT {
     @Order(1)
     void firstUserIsAdmin_secondIsAttendant_loginWorks() {
         var reg1 = post("/api/auth/register",
-                Map.of("name", "Admin", "email", "admin@test.io", "password", "Secret1!"), null);
+                Map.of("name", "Admin", "email", "admin@test.io", "password", "Secret1!23456"), null);
         assertEquals(HttpStatus.OK, reg1.getStatusCode());
         assertEquals("ADMIN", body(reg1).path("role").asText());
         assertFalse(body(reg1).has("token"));
         adminSession = sessionCookie(reg1);
 
         var reg2 = post("/api/auth/register",
-                Map.of("name", "Atendente 1", "email", "att1@test.io", "password", "Secret1!"), null);
+                Map.of("name", "Atendente 1", "email", "att1@test.io", "password", "Secret1!23456"), null);
         assertEquals("ATTENDANT", body(reg2).path("role").asText());
         att1Session = sessionCookie(reg2);
 
         var reg3 = post("/api/auth/register",
-                Map.of("name", "Atendente 2", "email", "att2@test.io", "password", "Secret1!"), null);
+                Map.of("name", "Atendente 2", "email", "att2@test.io", "password", "Secret1!23456"), null);
         att2Session = sessionCookie(reg3);
         att2UserId = body(reg3).path("id").asLong();
 
-        var login = post("/api/auth/login", Map.of("email", "admin@test.io", "password", "Secret1!"), null);
+        var login = post("/api/auth/login", Map.of("email", "admin@test.io", "password", "Secret1!23456"), null);
         assertEquals(HttpStatus.OK, login.getStatusCode());
         assertFalse(body(login).has("token"));
         assertNotNull(sessionCookie(login));
@@ -243,7 +243,7 @@ class FlowIT {
         var upd = exchange(HttpMethod.PUT, "/api/users/" + att2UserId, Map.of("active", false), adminSession);
         assertEquals(HttpStatus.OK, upd.getStatusCode());
 
-        var login = post("/api/auth/login", Map.of("email", "att2@test.io", "password", "Secret1!"), null);
+        var login = post("/api/auth/login", Map.of("email", "att2@test.io", "password", "Secret1!23456"), null);
         assertEquals(HttpStatus.FORBIDDEN, login.getStatusCode());
 
         var blocked = post("/api/tickets/call-next", Map.of("counterId", counter2Id), att2Session);

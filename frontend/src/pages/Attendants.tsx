@@ -52,7 +52,7 @@ export default function Attendants() {
         <form className="grid-form" onSubmit={submit}>
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome completo" required maxLength={120} />
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Senha (mín. 6)" required minLength={6} />
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Senha (mín. 12)" required minLength={12} />
           <button className="btn primary" disabled={loading}>{loading ? 'Salvando…' : 'Cadastrar'}</button>
         </form>
       </section>

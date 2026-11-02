@@ -20,10 +20,10 @@ public class UserController {
 
     public record CreateReq(@NotBlank @Size(max = 120) String name,
                             @NotBlank @Email String email,
-                            @NotBlank @Size(min = 6, max = 72) String password) {}
+                            @NotBlank @Size(min = 12, max = 72) String password) {}
     public record UpdateReq(@Size(max = 120) String name,
                             @Email String email,
-                            @Size(min = 6, max = 72) String password,
+                            @Size(min = 12, max = 72) String password,
                             Boolean active) {}
     public record UserDTO(Long id, String name, String email, String role, boolean active, Instant createdAt) {
         static UserDTO of(User u) { return new UserDTO(u.getId(), u.getName(), u.getEmail(), u.getRole().name(), u.isActive(), u.getCreatedAt()); }
@@ -53,8 +53,11 @@ public class UserController {
         }
         if (req.name() != null && !req.name().isBlank()) u.setName(req.name().trim());
         if (req.password() != null && !req.password().isBlank()) {
-            if (req.password().length() < 6) throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, "Senha deve ter no mínimo 6 caracteres.");
+            if (req.password().length() < 12) throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, "Senha deve ter no mínimo 12 caracteres.");
             u.setPasswordHash(encoder.encode(req.password()));
+            // Reset por administrador: exige troca no próximo acesso e revoga sessões antigas.
+            u.setMustChangePassword(true);
+            u.setTokenVersion((u.getTokenVersion() == null ? 0 : u.getTokenVersion()) + 1);
         }
         if (req.active() != null) {
             if (!req.active() && u.getRole() == User.Role.ADMIN)

@@ -38,6 +38,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     var userOpt = userRepository.findByEmailIgnoreCase(claims.getSubject());
                     if (userOpt.isPresent()) {
                         User user = userOpt.get();
+                        // revogação: token de versão anterior à atual (troca/reset de senha) não autentica
+                        Integer tv = claims.get("tv", Integer.class);
+                        int current = user.getTokenVersion() == null ? 0 : user.getTokenVersion();
+                        if ((tv == null ? 0 : tv) != current) {
+                            chain.doFilter(req, res);
+                            return;
+                        }
                         if (user.isActive()) {
                             if (user.isMustChangePassword() && !isPasswordChangePath(req)) {
                                 writePasswordChangeRequired(res);

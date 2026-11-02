@@ -21,9 +21,9 @@ public class JwtService {
         this.expirationMs = expirationMs;
     }
 
-    public String generate(String email, String role) {
+    public String generate(String email, String role, Integer tokenVersion) {
         Date now = new Date();
-        return Jwts.builder().subject(email).claim("role", role)
+        return Jwts.builder().subject(email).claim("role", role).claim("tv", tokenVersion)
                 .issuedAt(now).expiration(new Date(now.getTime() + expirationMs))
                 .signWith(key).compact();
     }
