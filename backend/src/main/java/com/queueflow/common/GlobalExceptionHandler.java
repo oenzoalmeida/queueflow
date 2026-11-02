@@ -42,6 +42,11 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.METHOD_NOT_ALLOWED, "Método HTTP não suportado para este recurso.", Map.of());
     }
 
+    @ExceptionHandler(org.springframework.web.bind.MissingServletRequestParameterException.class)
+    public ResponseEntity<Map<String, Object>> missingParam(org.springframework.web.bind.MissingServletRequestParameterException ex) {
+        return build(HttpStatus.BAD_REQUEST, "Parâmetro obrigatório ausente: " + ex.getParameterName(), Map.of());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> generic(Exception ex) {
         log.error("Unhandled exception", ex);
