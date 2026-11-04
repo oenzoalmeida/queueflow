@@ -18,6 +18,8 @@ export default function AttendantScreen() {
   const [state, setState] = useState<StateResp | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [syncError, setSyncError] = useState<string | null>(null)
+  const [syncFailed, setSyncFailed] = useState(false)
 
   const loadCounters = useCallback(async () => {
     const list: CounterDTO[] = (await api.get('/counters')).data
@@ -35,9 +37,14 @@ export default function AttendantScreen() {
 
   const loadState = useCallback(async (cid: number) => {
     try {
-      setState((await api.get(`/tickets/state?counterId=${cid}`)).data)
+      const next = (await api.get(`/tickets/state?counterId=${cid}`)).data
+      setState(next)
+      setSyncFailed(false)
+      setSyncError(null)
     } catch (e) {
-      setState({ current: null, waiting: 0 })
+      // Never replace the last known state with fictitious empty queue data.
+      setSyncFailed(true)
+      setSyncError('Não foi possível atualizar o guichê. Aguarde a reconexão.')
     }
   }, [])
 
@@ -71,7 +78,7 @@ export default function AttendantScreen() {
     setBusy(true); setError(null)
     try {
       await api.post('/counters/release')
-      setCounterId(null); setClaimedId(null); setState(null)
+      setCounterId(null); setClaimedId(null); setState(null); setSyncFailed(false); setSyncError(null)
     } catch (e) {
       setError(errMessage(e))
     } finally {
@@ -83,6 +90,7 @@ export default function AttendantScreen() {
     if (!claimedId) return
     setBusy(true); setError(null)
     try {
+      if (syncFailed) return
       await api.post(`/tickets/${action}`, { counterId: claimedId })
       await loadState(claimedId)
     } catch (e) {
@@ -131,7 +139,8 @@ export default function AttendantScreen() {
             <button className="btn small ghost" onClick={releaseCounter} disabled={busy}>Trocar guichê</button>
           </div>
 
-          {error && <div className="alert error">{error}</div>}
+          {error && <div className="alert error" role="alert">{error}</div>}
+          {syncError && <div className="alert error" role="alert">{syncError}</div>}
 
           <section className="current-ticket card center">
             {state?.current ? (
@@ -155,19 +164,19 @@ export default function AttendantScreen() {
 
           <div className="actions-row">
             {state?.current == null && (
-              <button className="btn primary huge" onClick={() => act('call-next')} disabled={busy}>
+              <button className="btn primary huge" onClick={() => act('call-next')} disabled={busy || syncFailed}>
                 CHAMAR PRÓXIMO
               </button>
             )}
             {state?.current?.status === 'CALLED' && (
               <>
-                <button className="btn primary huge" onClick={() => act('start')} disabled={busy}>INICIAR ATENDIMENTO</button>
-                <button className="btn ghost huge" onClick={() => act('recall')} disabled={busy}>RECHAMAR</button>
-                <button className="btn danger huge" onClick={() => act('absent')} disabled={busy}>AUSENTE</button>
+                <button className="btn primary huge" onClick={() => act('start')} disabled={busy || syncFailed}>INICIAR ATENDIMENTO</button>
+                <button className="btn ghost huge" onClick={() => act('recall')} disabled={busy || syncFailed}>RECHAMAR</button>
+                <button className="btn danger huge" onClick={() => act('absent')} disabled={busy || syncFailed}>AUSENTE</button>
               </>
             )}
             {state?.current?.status === 'IN_SERVICE' && (
-              <button className="btn primary huge" onClick={() => act('finish')} disabled={busy}>FINALIZAR</button>
+              <button className="btn primary huge" onClick={() => act('finish')} disabled={busy || syncFailed}>FINALIZAR</button>
             )}
           </div>
         </>
