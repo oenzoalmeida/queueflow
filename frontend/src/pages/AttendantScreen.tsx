@@ -18,6 +18,7 @@ export default function AttendantScreen() {
   const [state, setState] = useState<StateResp | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [syncError, setSyncError] = useState<string | null>(null)
   const [syncFailed, setSyncFailed] = useState(false)
 
   const loadCounters = useCallback(async () => {
@@ -39,11 +40,11 @@ export default function AttendantScreen() {
       const next = (await api.get(`/tickets/state?counterId=${cid}`)).data
       setState(next)
       setSyncFailed(false)
-      setError(null)
+      setSyncError(null)
     } catch (e) {
       // Never replace the last known state with fictitious empty queue data.
       setSyncFailed(true)
-      setError('Não foi possível atualizar o guichê. Aguarde a reconexão.')
+      setSyncError('Não foi possível atualizar o guichê. Aguarde a reconexão.')
     }
   }, [])
 
@@ -77,7 +78,7 @@ export default function AttendantScreen() {
     setBusy(true); setError(null)
     try {
       await api.post('/counters/release')
-      setCounterId(null); setClaimedId(null); setState(null); setSyncFailed(false)
+      setCounterId(null); setClaimedId(null); setState(null); setSyncFailed(false); setSyncError(null)
     } catch (e) {
       setError(errMessage(e))
     } finally {
@@ -139,6 +140,7 @@ export default function AttendantScreen() {
           </div>
 
           {error && <div className="alert error" role="alert">{error}</div>}
+          {syncError && <div className="alert error" role="alert">{syncError}</div>}
 
           <section className="current-ticket card center">
             {state?.current ? (
