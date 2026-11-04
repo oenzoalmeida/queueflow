@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { todayLocalISODate } from '../dateLocal'
 import { api } from '../api/client'
 import { STATUS_LABEL, type QueueDTO, type TicketDTO, type UserDTO } from '../types'
 import { usePageTitle } from '../usePageTitle'
@@ -15,7 +16,7 @@ export default function History() {
   const [page, setPage] = useState(0)
   const [queues, setQueues] = useState<QueueDTO[]>([])
   const [attendants, setAttendants] = useState<UserDTO[]>([])
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
+  const [date, setDate] = useState(todayLocalISODate())
   const [queueId, setQueueId] = useState('')
   const [status, setStatus] = useState('')
   const [attendantId, setAttendantId] = useState('')
