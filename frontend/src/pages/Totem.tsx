@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, Printer } from 'lucide-react'
 import { api } from '../api/client'
 import { usePageTitle } from '../usePageTitle'
@@ -13,18 +13,26 @@ interface Issued {
 }
 
 export default function Totem() {
-  const [queues, setQueues] = useState<PubQueue[]>([])
+  const [queues, setQueues] = useState<PubQueue[] | null>(null)
   const [queue, setQueue] = useState<PubQueue | null>(null)
   const [priority, setPriority] = useState(false)
   const [issued, setIssued] = useState<Issued | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const requestInFlight = useRef(false)
 
-  const load = () => api.get('/public/queues').then((r) => setQueues(r.data)).catch(() => setError('Falha ao carregar filas.'))
+  const load = () => {
+    setError(null)
+    setQueues(null)
+    return api.get('/public/queues')
+      .then((r) => setQueues(r.data))
+      .catch(() => setError('Não conseguimos carregar as opções de atendimento. Confira a conexão e tente novamente.'))
+  }
   useEffect(() => { load() }, [])
 
   const confirm = async () => {
-    if (!queue) return
+    if (!queue || requestInFlight.current) return
+    requestInFlight.current = true
     setLoading(true); setError(null)
     try {
       const { data } = await api.post('/public/tickets', {
@@ -35,6 +43,7 @@ export default function Totem() {
     } catch {
       setError('Não foi possível emitir a senha. Tente novamente.')
     } finally {
+      requestInFlight.current = false
       setLoading(false)
     }
   }
@@ -56,8 +65,10 @@ export default function Totem() {
       ) : !queue ? (
         <>
           <h1 className="totem-title">Como podemos ajudar?</h1>
-          {error && <div className="alert error">{error}</div>}
-          {queues.length === 0 ? (
+          {error && <div role="alert" className="alert error">{error} <button type="button" className="btn ghost" onClick={() => void load()}>Tentar novamente</button></div>}
+          {!queues ? (
+            error ? null : <p role="status" className="empty">Carregando opções de atendimento…</p>
+          ) : queues.length === 0 ? (
             <p className="empty">Nenhuma fila disponível no momento.</p>
           ) : (
             <div className="totem-grid">
@@ -73,13 +84,14 @@ export default function Totem() {
       ) : (
         <>
           <h1 className="totem-title">{queue.name}</h1>
-          <p className="muted center-block">Escolha o tipo de atendimento</p>
+          <p className="muted center-block">Escolha o tipo de atendimento e toque em “Confirmar” para receber sua senha.</p>
+          {error && <div role="alert" className="alert error">{error}</div>}
           <div className="totem-grid two">
-            <button className={`totem-card choice ${!priority ? 'selected' : ''}`} onClick={() => setPriority(false)}>
+            <button className={`totem-card choice ${!priority ? 'selected' : ''}`} aria-pressed={!priority} onClick={() => setPriority(false)}>
               <span className="totem-name">Atendimento normal</span>
               <span className="totem-prefix">{queue.prefix}</span>
             </button>
-            <button className={`totem-card choice priority ${priority ? 'selected' : ''}`} onClick={() => setPriority(true)}>
+            <button className={`totem-card choice priority ${priority ? 'selected' : ''}`} aria-pressed={priority} onClick={() => setPriority(true)}>
               <span className="totem-name">Atendimento prioritário</span>
               <span className="totem-prefix">P</span>
             </button>
@@ -89,7 +101,7 @@ export default function Totem() {
               <ArrowLeft size={20} /> Voltar
             </button>
             <button className="btn primary big-btn" onClick={confirm} disabled={loading}>
-              {loading ? 'Emitindo…' : 'Confirmar'}
+              {loading ? 'Emitindo…' : 'Emitir minha senha'}
             </button>
           </div>
         </>
