@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import AttendantScreen from './AttendantScreen'
 
@@ -69,4 +69,16 @@ describe('AttendantScreen synchronization failures', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'RECHAMAR' })).not.toBeDisabled())
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
+  it('keeps an action failure visible even when resynchronization succeeds', async () => {
+    mocks.post.mockRejectedValueOnce(new Error('server failure'))
+    render(<AttendantScreen />)
+    await screen.findByText('A007')
+
+    fireEvent.click(screen.getByRole('button', { name: 'RECHAMAR' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('Falha ao executar ação.')
+    await waitFor(() => expect(mocks.get).toHaveBeenCalledWith('/tickets/state?counterId=1'))
+    expect(screen.getByRole('alert')).toHaveTextContent('Falha ao executar ação.')
+    expect(screen.getByRole('button', { name: 'RECHAMAR' })).not.toBeDisabled()
+  })
+
 })
