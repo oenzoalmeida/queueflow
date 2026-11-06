@@ -62,7 +62,7 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_DB: queueflow_test
+          POSTGRES_DB: queueflow
           POSTGRES_USER: queueflow
           POSTGRES_PASSWORD: queueflow
         ports:
@@ -80,11 +80,15 @@ jobs:
           java-version: '21'
           cache: maven
           cache-dependency-path: backend/pom.xml
-      - name: Build and start backend (profile test)
+      - name: Build and start backend
         working-directory: backend
+        env:
+          # mesmo valor dev-only de backend/src/test/resources/application-test.yml (jar nao ve application-test.yml)
+          JWT_SECRET: cXVldWVmbG93LWRldi1vbmx5LXNlY3JldC0zZjliNGQyYS04Y2UxLTRkNWEtYmMyOC00ODM5MWQ4YTdiZWYtdXNlLWVudi1pbi1wcm9kdWN0aW9u
+          SPRING_PROFILES_ACTIVE: test
         run: |
           bash ./mvnw --batch-mode --no-transfer-progress -DskipTests package
-          SPRING_PROFILES_ACTIVE=test nohup java -jar target/*.jar > /tmp/backend.log 2>&1 &
+          nohup java -jar target/*.jar > /tmp/backend.log 2>&1 &
           for i in $(seq 1 45); do curl -sf http://localhost:8080/api/public/health && exit 0; sleep 2; done
           echo "backend did not start"; tail -50 /tmp/backend.log; exit 1
       - uses: actions/setup-node@v4
