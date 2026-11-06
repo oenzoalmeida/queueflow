@@ -210,3 +210,67 @@ tr:hover td { background: #f8fafd; }
 .ws-status .ws-off { color: #fbbf24; font-weight: 600; }
 .ws-status .ws-dot { flex: none; }
 .display-top-right { display: inline-flex; align-items: center; gap: 12px; }
+
+/* ---------- polimento de interface e movimento ----------
+   Princípios (inspirados em "fluid interfaces" da Apple): resposta imediata ao toque,
+   transições interrompíveis (só transform/opacity, partem do valor atual), movimento
+   curto e com propósito, hierarquia tipográfica clara. Tudo respeita prefers-reduced-motion. */
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --press: 0.97;
+  --shadow-lift: 0 1px 2px rgba(22, 35, 59, 0.06), 0 8px 24px rgba(22, 35, 59, 0.1);
+  font-family: system-ui, -apple-system, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+button, .btn, .totem-card, .side-link, .sound-btn { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+
+.btn { transition: background-color 0.15s, opacity 0.15s, transform 0.18s var(--ease-out); }
+.btn:active:not(:disabled) { transform: scale(var(--press)); transition-duration: 0.06s; }
+.sound-btn { transition: background-color 0.15s, transform 0.18s var(--ease-out); }
+.sound-btn:hover { background: rgba(255, 255, 255, 0.2); }
+.sound-btn:active { transform: scale(var(--press)); transition-duration: 0.06s; }
+
+.side-link { transition: background-color 0.15s, color 0.15s, transform 0.18s var(--ease-out); }
+.side-link:active { transform: scale(0.98); transition-duration: 0.06s; }
+
+.card { box-shadow: var(--shadow), 0 6px 18px rgba(22, 35, 59, 0.04); }
+tr td { transition: background-color 0.15s; }
+
+/* tipografia: números tabulares e espaçamento ótico nos textos grandes */
+.mono, .stat-value, .code-xl, .totem-code, .totem-prefix, .display-code, .display-history li, .ws-last { font-variant-numeric: tabular-nums; }
+.stat-value { letter-spacing: -0.02em; }
+.totem-title { letter-spacing: -0.02em; line-height: 1.1; }
+.code-xl, .totem-code, .display-code { letter-spacing: -0.01em; }
+th { letter-spacing: 0.05em; }
+
+/* totem: feedback imediato e seleção que "assenta" */
+.totem-card { transition: border-color 0.15s, background-color 0.15s, box-shadow 0.25s var(--ease-out), transform 0.25s var(--ease-out); }
+.totem-card:hover { box-shadow: var(--shadow-lift); transform: translateY(-2px); }
+.totem-card:active { transform: scale(var(--press)); box-shadow: none; transition-duration: 0.06s; }
+.totem-card.choice.selected { box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14); }
+.totem-card.choice.priority.selected { box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.16); }
+
+/* entradas curtas (só opacity/transform) */
+@keyframes qf-rise { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes qf-pop { 0% { opacity: 0; transform: scale(0.92); } 60% { opacity: 1; transform: scale(1.025); } 100% { transform: scale(1); } }
+@keyframes qf-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes qf-pulse { 0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.5); } 100% { box-shadow: 0 0 0 12px rgba(22, 163, 74, 0); } }
+.totem-result, .card, .login-card { animation: qf-rise 0.4s var(--ease-out) both; }
+.display-call { display: contents; }
+.display-call .display-code { animation: qf-pop 0.5s var(--ease-out) both; }
+.display-call .display-counter { animation: qf-rise 0.45s var(--ease-out) 0.08s both; }
+.bar { transform-origin: bottom; animation: qf-grow 0.55s var(--ease-out) both; }
+.ws-dot.on { animation: qf-pulse 2.4s ease-out infinite; }
+
+/* menu lateral no mobile: abre/fecha com a mesma curva, fundo desfocado */
+@media (max-width: 900px) {
+  .sidebar { transition: left 0.3s var(--ease-out); }
+  .backdrop { backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); animation: qf-fade 0.2s ease-out both; }
+}
+@keyframes qf-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* acessibilidade: sem animação para quem pediu menos movimento */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  .btn:active:not(:disabled), .totem-card:hover, .totem-card:active, .side-link:active, .sound-btn:active { transform: none; }
+}

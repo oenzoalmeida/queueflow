@@ -95,10 +95,10 @@ export default function Display() {
 
       <section className="display-highlight">
         {state.highlight ? (
-          <>
+          <div className="display-call" key={`${state.highlight.id}-${state.highlight.calledAt}`}>
             <div className="display-code">{state.highlight.displayCode}</div>
             <div className="display-counter">{state.highlight.counterName ?? '—'}</div>
-          </>
+          </div>
         ) : (
           <div className="display-idle">
             <div className="display-code muted">—</div>
