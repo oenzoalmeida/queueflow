@@ -12,7 +12,7 @@ const ADMIN = { name: 'Admin E2E', email: 'admin-e2e@test.io', password: 'SenhaA
 const DIR = '../docs/screenshots'
 
 test('capturas das telas para documentação', async ({ page, request, browser }) => {
-  test.setTimeout(180_000)
+  test.setTimeout(300_000) // CI e mais lenta que o ambiente local
   // bootstrap idempotente: se o admin já existe (spec principal rodou antes), só faz login
   const reg = await request.post(`${API}/auth/register`, {
     data: { name: ADMIN.name, email: ADMIN.email, password: ADMIN.password },
@@ -38,11 +38,14 @@ test('capturas das telas para documentação', async ({ page, request, browser }
     }
   }
 
-  // guichê para a captura da tela do atendente (idempotente)
+  // guichê próprio para a captura da tela do atendente (idempotente): a spec principal
+  // deixa o Guichê 1 ocupado pela Ana E2E (claim persiste no banco do job)
   const counters = await request.get(`${API}/counters`)
-  if (!(await counters.json()).some((c: { name: string }) => c.name === 'Guichê 1')) {
-    const c = await request.post(`${API}/counters`, { data: { name: 'Guichê 1' } })
+  let guiche = (await counters.json()).find((c: { id: number; name: string }) => c.name === 'Guichê 2')
+  if (!guiche) {
+    const c = await request.post(`${API}/counters`, { data: { name: 'Guichê 2' } })
     expect(c.ok()).toBeTruthy()
+    guiche = await c.json()
   }
 
   await page.goto('/login')
@@ -69,7 +72,7 @@ test('capturas das telas para documentação', async ({ page, request, browser }
   await display.getByRole('heading', { name: 'Últimas chamadas' }).waitFor()
 
   // atendente com senha em atendimento (também alimenta o display via WebSocket)
-  const attCreds = { name: 'Ana E2E', email: 'ana-e2e@test.io', temp: 'SenhaTemp1234', final: 'SenhaAna12345' }
+  const attCreds = { name: 'Bia E2E', email: 'bia-e2e@test.io', temp: 'SenhaTemp1234', final: 'SenhaBia12345' }
   const mk = await request.post(`${API}/users`, { data: { name: attCreds.name, email: attCreds.email, password: attCreds.temp } })
   const attCtx = await browser.newContext()
   if (mk.ok()) {
@@ -85,9 +88,16 @@ test('capturas das telas para documentação', async ({ page, request, browser }
   }
   const att = await attCtx.newPage()
   await att.goto('/attendant')
-  await att.getByLabel('Escolha seu guichê').selectOption({ label: 'Guichê 1' })
-  await att.getByRole('button', { name: 'Entrar no guichê' }).click()
-  await att.getByRole('button', { name: 'CHAMAR PRÓXIMO' }).click()
+  // tolerância: se a atendente já tiver um guichê (rerodada local), a tela abre
+  // direto no painel do guichê, sem o select
+  const callBtn = att.getByRole('button', { name: 'CHAMAR PRÓXIMO' })
+  const sel = att.getByLabel('Escolha seu guichê')
+  await expect(sel.or(callBtn)).toBeVisible({ timeout: 30_000 })
+  if (await sel.isVisible()) {
+    await sel.selectOption(String(guiche.id))
+    await att.getByRole('button', { name: 'Entrar no guichê' }).click()
+  }
+  await callBtn.click()
   await expect(att.locator('.code-xl')).not.toHaveText('—')
   await att.getByRole('button', { name: 'INICIAR ATENDIMENTO' }).click()
   await expect(att.getByText('EM ATENDIMENTO')).toBeVisible()

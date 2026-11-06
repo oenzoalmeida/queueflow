@@ -55,3 +55,56 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: queueflow
+          POSTGRES_USER: queueflow
+          POSTGRES_PASSWORD: queueflow
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U queueflow -d queueflow_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+      - name: Build and start backend
+        working-directory: backend
+        env:
+          # mesmo valor dev-only de backend/src/test/resources/application-test.yml (jar nao ve application-test.yml)
+          JWT_SECRET: cXVldWVmbG93LWRldi1vbmx5LXNlY3JldC0zZjliNGQyYS04Y2UxLTRkNWEtYmMyOC00ODM5MWQ4YTdiZWYtdXNlLWVudi1pbi1wcm9kdWN0aW9u
+          SPRING_PROFILES_ACTIVE: test
+        run: |
+          bash ./mvnw --batch-mode --no-transfer-progress -DskipTests package
+          nohup java -jar target/*.jar > /tmp/backend.log 2>&1 &
+          for i in $(seq 1 45); do curl -sf http://localhost:8080/api/public/health && exit 0; sleep 2; done
+          echo "backend did not start"; tail -50 /tmp/backend.log; exit 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Build frontend and install Chromium
+        working-directory: frontend
+        run: |
+          npm ci
+          VITE_API_URL=http://localhost:8080 VITE_WS_URL=http://localhost:8080 npm run build
+          npx playwright install --with-deps chromium
+      - name: Start frontend preview and run E2E
+        working-directory: frontend
+        run: |
+          nohup npx vite preview --port 5173 --strictPort > /tmp/preview.log 2>&1 &
+          for i in $(seq 1 15); do curl -sf http://localhost:5173 >/dev/null && break; sleep 1; done
+          npx playwright test
