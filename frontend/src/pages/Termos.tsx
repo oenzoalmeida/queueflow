@@ -1,5 +1,6 @@
 import { usePageTitle } from '../usePageTitle'
 export default function Termos() {
+  usePageTitle('Termos de Uso')
   return (
     <main className="legal-page">
       <article className="legal-card">

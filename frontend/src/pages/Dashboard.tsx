@@ -20,6 +20,7 @@ interface DashboardData {
 const nf = (v: number | null, suffix = '') => (v == null ? '—' : `${v}${suffix}`)
 
 export default function Dashboard() {
+  usePageTitle('Dashboard')
   const [data, setData] = useState<DashboardData | null>(null)
   const [error, setError] = useState<string | null>(null)
 

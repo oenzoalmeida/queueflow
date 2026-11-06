@@ -1,5 +1,6 @@
 import { usePageTitle } from '../usePageTitle'
 export default function Privacidade() {
+  usePageTitle('Política de Privacidade')
   return (
     <main className="legal-page">
       <article className="legal-card">

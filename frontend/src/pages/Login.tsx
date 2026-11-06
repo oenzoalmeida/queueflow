@@ -4,6 +4,7 @@ import { useAuth } from '../auth'
 import { usePageTitle } from '../usePageTitle'
 
 export default function Login() {
+  usePageTitle('Entrar')
   const { login, user } = useAuth()
   const nav = useNavigate()
   const [email, setEmail] = useState('')

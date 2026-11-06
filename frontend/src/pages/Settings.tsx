@@ -3,6 +3,7 @@ import { api, errMessage } from '../api/client'
 import { usePageTitle } from '../usePageTitle'
 
 export default function Settings() {
+  usePageTitle('Configurações')
   const [value, setValue] = useState<number>(2)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

@@ -4,6 +4,7 @@ import type { QueueDTO } from '../types'
 import { usePageTitle } from '../usePageTitle'
 
 export default function Queues() {
+  usePageTitle('Filas')
   const [queues, setQueues] = useState<QueueDTO[]>([])
   const [name, setName] = useState('')
   const [prefix, setPrefix] = useState('')
