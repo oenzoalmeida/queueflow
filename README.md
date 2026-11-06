@@ -131,7 +131,7 @@ Frontend: testes automatizados com Vitest + Testing Library (`npm test` em `fron
 
 Frontend (produção): https://oenzoa-queueflow.web.app (Firebase Hosting, deploy via GitHub Actions).
 
-Backend (produção): https://queueflow-backend-oe.azurewebsites.net (Azure App Service B1, container GHCR, Always On + WebSockets).
+Backend (produção): `https://queueflow-backend-oe.azurewebsites.net` (Azure App Service B1, container GHCR, Always On + WebSockets).
 
 Banco de dados: PostgreSQL gerenciado no Aiven (preservado na migração Render → Azure).
 
