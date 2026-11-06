@@ -11,6 +11,7 @@ const fmtTime = (iso: string | null) =>
   iso ? new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : null
 
 export default function AttendantScreen() {
+  usePageTitle('Atendimento')
   const { user, logout } = useAuth()
   const [counters, setCounters] = useState<CounterDTO[]>([])
   const [counterId, setCounterId] = useState<number | null>(null)

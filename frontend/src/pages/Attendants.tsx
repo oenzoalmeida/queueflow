@@ -4,6 +4,7 @@ import type { UserDTO } from '../types'
 import { usePageTitle } from '../usePageTitle'
 
 export default function Attendants() {
+  usePageTitle('Atendentes')
   const [users, setUsers] = useState<UserDTO[]>([])
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')

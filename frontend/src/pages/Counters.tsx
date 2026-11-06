@@ -4,6 +4,7 @@ import type { CounterDTO } from '../types'
 import { usePageTitle } from '../usePageTitle'
 
 export default function Counters() {
+  usePageTitle('Guichês')
   const [counters, setCounters] = useState<CounterDTO[]>([])
   const [name, setName] = useState('')
   const [editing, setEditing] = useState<number | null>(null)

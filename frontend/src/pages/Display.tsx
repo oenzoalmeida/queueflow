@@ -16,6 +16,7 @@ async function fetchState(): Promise<DisplayState> {
 }
 
 export default function Display() {
+  usePageTitle('Painel de chamadas')
   const [state, setState] = useState<DisplayState>({ highlight: null, lastCalls: [], waiting: 0 })
   const [connected, setConnected] = useState(false)
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
@@ -51,8 +52,8 @@ export default function Display() {
         setState((prev) => ({
           highlight: t,
           lastCalls: [t, prev.highlight, ...prev.lastCalls]
-            .filter((x): x is TicketDTO => !!x && x.id !== t.id || x?.id === t.id)
-            .filter((x, i, arr) => arr.findIndex((y) => y?.id === x?.id) === i)
+            .filter((x): x is TicketDTO => !!x)
+            .filter((x, i, arr) => arr.findIndex((y) => y.id === x.id) === i)
             .slice(0, 6),
           waiting: prev.waiting,
         }))

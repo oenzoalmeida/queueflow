@@ -11,11 +11,13 @@ const fmtTime = (iso: string | null) =>
 const fmtMin = (v: number | null) => (v == null ? '—' : `${v} min`)
 
 export default function History() {
+  usePageTitle('Histórico')
   const [rows, setRows] = useState<Row[]>([])
   const [totalPages, setTotalPages] = useState(1)
   const [page, setPage] = useState(0)
   const [queues, setQueues] = useState<QueueDTO[]>([])
   const [attendants, setAttendants] = useState<UserDTO[]>([])
+  const [error, setError] = useState<string | null>(null)
   const [date, setDate] = useState(todayLocalISODate())
   const [queueId, setQueueId] = useState('')
   const [status, setStatus] = useState('')
@@ -28,19 +30,25 @@ export default function History() {
   }, [])
 
   async function load(p = page) {
-    const params = new URLSearchParams({ date, page: String(p), size: '20' })
-    if (queueId) params.set('queueId', queueId)
-    if (status) params.set('status', status)
-    if (attendantId) params.set('attendantId', attendantId)
-    const { data } = await api.get(`/history?${params}`)
-    setRows(data.content); setTotalPages(data.totalPages || 1); setPage(data.number ?? p)
+    try {
+      const params = new URLSearchParams({ date, page: String(p), size: '20' })
+      if (queueId) params.set('queueId', queueId)
+      if (status) params.set('status', status)
+      if (attendantId) params.set('attendantId', attendantId)
+      const { data } = await api.get(`/history?${params}`)
+      setRows(data.content); setTotalPages(data.totalPages || 1); setPage(data.number ?? p)
+      setError(null)
+    } catch {
+      // mantém as linhas já exibidas; só avisa que a atualização falhou
+      setError('Não foi possível carregar o histórico. Confira a conexão e tente novamente.')
+    }
   }
 
-  useEffect(() => { load(0).catch(() => {}) }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load(0) }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
-    load(0).catch(() => {})
+    load(0)
   }
 
   return (
@@ -72,6 +80,7 @@ export default function History() {
       </section>
 
       <section className="card">
+        {error && <div className="alert error" role="alert">{error}</div>}
         {rows.length === 0 ? (
           <p className="empty">Nenhuma senha encontrada para os filtros escolhidos.</p>
         ) : (

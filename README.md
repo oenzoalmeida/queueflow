@@ -54,7 +54,7 @@ Estrutura preparada para execução com Docker.
 
 **Frontend:** React, TypeScript, Vite, React Router, Axios, STOMP/SockJS, Lucide React.
 
-**Backend:** Java 21, Spring Boot 3, Spring Web, Spring Data JPA, Spring Security, Spring WebSocket, JWT, Flyway, PostgreSQL.
+**Backend:** Java 21, Spring Boot 4, Spring Web, Spring Data JPA, Spring Security, Spring WebSocket, JWT, Flyway, PostgreSQL.
 
 **Infraestrutura:** Docker, Docker Compose, Azure App Service (backend), Firebase Hosting (frontend), PostgreSQL gerenciado (Aiven).
 

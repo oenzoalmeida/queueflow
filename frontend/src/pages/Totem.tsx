@@ -13,6 +13,7 @@ interface Issued {
 }
 
 export default function Totem() {
+  usePageTitle('Totem de senhas')
   const [queues, setQueues] = useState<PubQueue[] | null>(null)
   const [queue, setQueue] = useState<PubQueue | null>(null)
   const [priority, setPriority] = useState(false)
