@@ -51,7 +51,7 @@ class TicketServiceCallTest {
 
     @BeforeEach
     void setup() {
-        service = new TicketService(tickets, sequences, prioritySequences, queues, counters, users, events, settings, ws);
+        service = new TicketService(tickets, sequences, prioritySequences, queues, counters, users, events, settings, ws, new com.queueflow.common.BusinessClock());
         attendant = User.builder().id(2L).name("Ana").role(User.Role.ATTENDANT).active(true).build();
         counter = Counter.builder().id(3L).name("Guichê 1").active(true).currentAttendant(attendant).build();
         queueA = Queue.builder().id(7L).name("Atendimento").prefix("A").active(true).build();
@@ -193,7 +193,7 @@ class TicketServiceCallTest {
     @Test
     void cancelRejectedForFinishedTicket() {
         Ticket t = activeTicket(Ticket.Status.FINISHED);
-        ApiException.Rule ex = assertThrows(ApiException.Rule.class, () -> service.cancel(t.getId()));
+        ApiException.Rule ex = assertThrows(ApiException.Rule.class, () -> service.cancel(t.getId(), 2L));
         assertTrue(ex.getMessage().contains("cancelar"));
     }
 }

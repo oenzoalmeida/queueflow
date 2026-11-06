@@ -1,5 +1,6 @@
 package com.queueflow.dashboard;
 
+import com.queueflow.common.BusinessClock;
 import com.queueflow.counter.CounterRepository;
 import com.queueflow.event.TicketEvent;
 import com.queueflow.event.TicketEventRepository;
@@ -28,6 +29,7 @@ public class DashboardService {
     private final TicketRepository tickets;
     private final CounterRepository counters;
     private final TicketEventRepository events;
+    private final BusinessClock clock;
 
     public record QueueVolume(String queueName, long issued) {}
 
@@ -41,11 +43,11 @@ public class DashboardService {
             Double avgWaitMinutes, Double avgServiceMinutes, long activeCounters,
             List<HourPoint> byHour, List<QueueVolume> byQueue, List<Entry> lastTickets) {}
 
-    /** Resumo do dia corrente, no fuso do servidor. */
+    /** Resumo do dia corrente, no fuso do negócio (BusinessClock). */
     @Transactional(readOnly = true)
     public DashboardDTO resumoDeHoje() {
-        ZoneId zone = ZoneId.systemDefault();
-        LocalDate d = LocalDate.now(zone);
+        ZoneId zone = clock.zone();
+        LocalDate d = clock.today();
         Instant from = d.atStartOfDay(zone).toInstant();
         Instant to = d.plusDays(1).atStartOfDay(zone).toInstant();
 
@@ -63,9 +65,10 @@ public class DashboardService {
         for (Ticket t : finishedToday)
             hours[t.getFinishedAt().atZone(zone).getHour()]++;
 
-        Map<String, Long> perQueue = new LinkedHashMap<>();
-        tickets.findAll().stream().filter(t -> !t.getCreatedAt().isBefore(from) && t.getCreatedAt().isBefore(to))
-                .forEach(t -> perQueue.merge(t.getQueue().getName(), 1L, Long::sum));
+        // volume por fila via agregação no banco (nunca tickets.findAll(): a tabela só cresce)
+        List<QueueVolume> perQueue = tickets.countIssuedByQueueBetween(from, to, PageRequest.ofSize(5)).stream()
+                .map(v -> new QueueVolume(v.getQueueName(), v.getIssued()))
+                .toList();
 
         var lastRows = tickets.findByStatusInOrderByCalledAtDesc(
                         Arrays.asList(Ticket.Status.values()), PageRequest.ofSize(8));
@@ -79,7 +82,7 @@ public class DashboardService {
                 Double.isNaN(avgService) ? null : Math.round(avgService / 60000.0 * 10) / 10.0,
                 counters.countByActiveTrue(),
                 hourly(hours),
-                volumes(perQueue),
+                perQueue,
                 entries(lastRows));
     }
 
@@ -87,11 +90,6 @@ public class DashboardService {
         List<HourPoint> list = new ArrayList<>();
         for (int i = 0; i < 24; i++) if (h[i] > 0) list.add(new HourPoint(i, h[i]));
         return list;
-    }
-
-    private static List<QueueVolume> volumes(Map<String, Long> m) {
-        return m.entrySet().stream().sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                .limit(5).map(e -> new QueueVolume(e.getKey(), e.getValue())).toList();
     }
 
     private static List<Entry> entries(List<Ticket> ts) {

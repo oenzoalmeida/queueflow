@@ -72,6 +72,7 @@ export default function Attendants() {
                   <td>{u.role === 'ADMIN' ? 'Administrador' : 'Atendente'}</td>
                   <td>
                     <span className={`tag ${u.active ? 'green' : 'gray'}`}>{u.active ? 'Ativo' : 'Inativo'}</span>
+                    {u.mustChangePassword && <span className="tag amber" style={{ marginLeft: 6 }}>Senha temporária</span>}
                   </td>
                   <td>
                     <button className="btn small ghost" onClick={() => toggleActive(u)}>

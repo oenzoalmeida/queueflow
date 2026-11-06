@@ -48,7 +48,7 @@ class TicketServiceIssueTest {
 
     @BeforeEach
     void setup() {
-        service = new TicketService(tickets, sequences, prioritySequences, queues, counters, users, events, settings, ws);
+        service = new TicketService(tickets, sequences, prioritySequences, queues, counters, users, events, settings, ws, new com.queueflow.common.BusinessClock());
         queueA = Queue.builder().id(7L).name("Atendimento").prefix("A").active(true).build();
         when(queues.findById(7L)).thenReturn(Optional.of(queueA));
         when(tickets.save(any())).thenAnswer(inv -> inv.getArgument(0));

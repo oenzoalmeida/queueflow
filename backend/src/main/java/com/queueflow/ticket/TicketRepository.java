@@ -35,4 +35,14 @@ public interface TicketRepository extends JpaRepository<Ticket, Long>, JpaSpecif
     long waitingAhead(@Param("queueId") Long queueId, @Param("id") Long id);
 
     long countByQueueIdAndStatus(Long queueId, Ticket.Status status);
+
+    interface QueueVolumeView {
+        String getQueueName();
+        long getIssued();
+    }
+
+    /** Volume emitido no intervalo, agrupado por fila, mais movimentadas primeiro. */
+    @Query("select t.queue.name as queueName, count(t) as issued from Ticket t "
+            + "where t.createdAt between :from and :to group by t.queue.name order by count(t) desc")
+    List<QueueVolumeView> countIssuedByQueueBetween(@Param("from") Instant from, @Param("to") Instant to, Pageable pageable);
 }

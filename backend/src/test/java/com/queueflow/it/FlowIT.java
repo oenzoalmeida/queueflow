@@ -73,9 +73,23 @@ class FlowIT {
         assertEquals(HttpStatus.UNAUTHORIZED, invalid.getStatusCode());
     }
 
+    /** Login com senha provisória + troca obrigatória; retorna a sessão já definitiva. */
+    String provisionAttendant(String email, String tempPassword, String newPassword) {
+        var login = post("/api/auth/login", Map.of("email", email, "password", tempPassword), null);
+        assertEquals(HttpStatus.OK, login.getStatusCode());
+        assertTrue(body(login).path("mustChangePassword").asBoolean(),
+                "atendente recém-criado pelo admin deve começar com troca obrigatória");
+        var blocked = exchange(HttpMethod.GET, "/api/tickets/state?counterId=1", null, sessionCookie(login));
+        assertEquals(HttpStatus.FORBIDDEN, blocked.getStatusCode(), "rotas de operação bloqueadas até a troca");
+        var changed = post("/api/auth/change-password",
+                Map.of("currentPassword", tempPassword, "newPassword", newPassword), sessionCookie(login));
+        assertEquals(HttpStatus.OK, changed.getStatusCode());
+        return sessionCookie(changed);
+    }
+
     @Test
     @Order(1)
-    void firstUserIsAdmin_secondIsAttendant_loginWorks() {
+    void firstUserIsAdmin_publicRegisterCloses_attendantsProvisionedByAdmin() {
         var reg1 = post("/api/auth/register",
                 Map.of("name", "Admin", "email", "admin@test.io", "password", "Secret1!23456"), null);
         assertEquals(HttpStatus.OK, reg1.getStatusCode());
@@ -83,15 +97,25 @@ class FlowIT {
         assertFalse(body(reg1).has("token"));
         adminSession = sessionCookie(reg1);
 
+        // com um usuário existente, o cadastro público fecha (antes criava atendente livremente)
         var reg2 = post("/api/auth/register",
-                Map.of("name", "Atendente 1", "email", "att1@test.io", "password", "Secret1!23456"), null);
-        assertEquals("ATTENDANT", body(reg2).path("role").asText());
-        att1Session = sessionCookie(reg2);
+                Map.of("name", "Tardio", "email", "late@test.io", "password", "Secret1!23456"), null);
+        assertEquals(HttpStatus.FORBIDDEN, reg2.getStatusCode(), "register must be bootstrap-only");
 
-        var reg3 = post("/api/auth/register",
-                Map.of("name", "Atendente 2", "email", "att2@test.io", "password", "Secret1!23456"), null);
-        att2Session = sessionCookie(reg3);
-        att2UserId = body(reg3).path("id").asLong();
+        // atendentes são provisionados pelo admin, com senha provisória e troca obrigatória
+        var mk1 = post("/api/users",
+                Map.of("name", "Atendente 1", "email", "att1@test.io", "password", "Secret1!23456"), adminSession);
+        assertEquals(HttpStatus.OK, mk1.getStatusCode());
+        assertEquals("ATTENDANT", body(mk1).path("role").asText());
+        assertTrue(body(mk1).path("mustChangePassword").asBoolean());
+
+        var mk2 = post("/api/users",
+                Map.of("name", "Atendente 2", "email", "att2@test.io", "password", "Secret1!23456"), adminSession);
+        assertEquals(HttpStatus.OK, mk2.getStatusCode());
+        att2UserId = body(mk2).path("id").asLong();
+
+        att1Session = provisionAttendant("att1@test.io", "Secret1!23456", "NovaSenhaAtt1!");
+        att2Session = provisionAttendant("att2@test.io", "Secret1!23456", "NovaSenhaAtt2!");
 
         var login = post("/api/auth/login", Map.of("email", "admin@test.io", "password", "Secret1!23456"), null);
         assertEquals(HttpStatus.OK, login.getStatusCode());
@@ -188,11 +212,12 @@ class FlowIT {
         queueBId = body(qB).path("id").asLong();
 
         jdbc.update("INSERT INTO daily_sequences(queue_id, day, last_number) VALUES (?, ?, 99)",
-                queueBId, LocalDate.now().minusDays(1));
+                queueBId, LocalDate.now(java.time.ZoneId.of("America/Sao_Paulo")).minusDays(1));
         var firstToday = post("/api/public/tickets", Map.of("queueId", queueBId, "priorityType", "NORMAL"), null);
         assertEquals("B001", body(firstToday).path("displayCode").asText());
 
-        jdbc.update("UPDATE daily_sequences SET last_number = 5 WHERE queue_id = ? AND day = ?", queueBId, LocalDate.now());
+        jdbc.update("UPDATE daily_sequences SET last_number = 5 WHERE queue_id = ? AND day = ?",
+                queueBId, LocalDate.now(java.time.ZoneId.of("America/Sao_Paulo")));
         var nextToday = post("/api/public/tickets", Map.of("queueId", queueBId, "priorityType", "NORMAL"), null);
         assertEquals("B006", body(nextToday).path("displayCode").asText());
     }
@@ -246,7 +271,7 @@ class FlowIT {
         var upd = exchange(HttpMethod.PUT, "/api/users/" + att2UserId, Map.of("active", false), adminSession);
         assertEquals(HttpStatus.OK, upd.getStatusCode());
 
-        var login = post("/api/auth/login", Map.of("email", "att2@test.io", "password", "Secret1!23456"), null);
+        var login = post("/api/auth/login", Map.of("email", "att2@test.io", "password", "NovaSenhaAtt2!"), null);
         assertEquals(HttpStatus.FORBIDDEN, login.getStatusCode());
 
         var blocked = post("/api/tickets/call-next", Map.of("counterId", counter2Id), att2Session);
@@ -279,6 +304,16 @@ class FlowIT {
         assertEquals(HttpStatus.OK, dash.getStatusCode());
         assertTrue(dash.getBody().path("issuedToday").asInt() >= 14);
         assertTrue(dash.getBody().path("finishedToday").asInt() > 0);
+        // volume por fila vem de agregação no banco, com a fila mais movimentada primeiro
+        var byQueue = dash.getBody().path("byQueue");
+        assertTrue(byQueue.size() >= 1, "byQueue deve refletir as emissões do dia");
+        assertEquals("Fila A", byQueue.get(0).path("queueName").asText());
+        assertTrue(byQueue.get(0).path("issued").asInt() >= 14);
+
+        var badPage = exchange(HttpMethod.GET, "/api/history?page=-1", null, adminSession);
+        assertEquals(HttpStatus.BAD_REQUEST, badPage.getStatusCode(), "página negativa deve ser 400, não 500");
+        var badSize = exchange(HttpMethod.GET, "/api/history?size=0", null, adminSession);
+        assertEquals(HttpStatus.BAD_REQUEST, badSize.getStatusCode());
 
         var display = exchange(HttpMethod.GET, "/api/public/display", null, null);
         assertEquals(HttpStatus.OK, display.getStatusCode());
@@ -289,5 +324,33 @@ class FlowIT {
 
         var settings = exchange(HttpMethod.GET, "/api/settings/priority", null, adminSession);
         assertEquals(2, settings.getBody().path("normalsBeforePriority").asInt());
+    }
+
+    @Test
+    @Order(10)
+    void issueDayFunctionMatchesBusinessZone() {
+        // 2026-11-07 02:30 UTC = 2026-11-06 23:30 em America/Sao_Paulo: a função do
+        // índice único precisa concordar com o BusinessClock, senão a emissão quebra
+        // na virada do dia por violação de unicidade.
+        java.sql.Date d = jdbc.queryForObject(
+                "SELECT ticket_issue_day('2026-11-07 02:30:00+00'::timestamptz)", java.sql.Date.class);
+        assertEquals(LocalDate.of(2026, 11, 6), d.toLocalDate());
+    }
+
+    @Test
+    @Order(11)
+    void cancelRecordsActingAttendant() {
+        post("/api/public/tickets", Map.of("queueId", queueAId, "priorityType", "NORMAL"), null);
+        var hist = exchange(HttpMethod.GET, "/api/history?status=WAITING&size=1", null, adminSession);
+        long id = hist.getBody().path("content").get(0).path("ticket").path("id").asLong();
+
+        var cancel = post("/api/tickets/" + id + "/cancel", null, att1Session);
+        assertEquals(HttpStatus.OK, cancel.getStatusCode());
+        assertEquals("CANCELLED", body(cancel).path("status").asText());
+
+        Integer recorded = jdbc.queryForObject(
+                "SELECT count(*) FROM ticket_events WHERE ticket_id = ? AND type = 'CANCELLED' AND attendant_id IS NOT NULL",
+                Integer.class, id);
+        assertEquals(1, recorded, "cancelamento deve registrar o atendente no evento");
     }
 }
