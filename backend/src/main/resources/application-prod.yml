@@ -33,3 +33,8 @@ queueflow:
     admin-password: ${QUEUEFLOW_BOOTSTRAP_ADMIN_PASSWORD:}
     attendant-email: ${QUEUEFLOW_BOOTSTRAP_ATTENDANT_EMAIL:}
     attendant-password: ${QUEUEFLOW_BOOTSTRAP_ATTENDANT_PASSWORD:}
+
+logging:
+  structured:
+    format:
+      console: logstash
