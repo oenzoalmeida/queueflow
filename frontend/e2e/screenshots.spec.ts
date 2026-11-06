@@ -40,9 +40,11 @@ test('capturas das telas para documentação', async ({ page, request, browser }
 
   // guichê para a captura da tela do atendente (idempotente)
   const counters = await request.get(`${API}/counters`)
-  if (!(await counters.json()).some((c: { name: string }) => c.name === 'Guichê 1')) {
+  let guiche = (await counters.json()).find((c: { id: number; name: string }) => c.name === 'Guichê 1')
+  if (!guiche) {
     const c = await request.post(`${API}/counters`, { data: { name: 'Guichê 1' } })
     expect(c.ok()).toBeTruthy()
+    guiche = await c.json()
   }
 
   await page.goto('/login')
@@ -85,7 +87,8 @@ test('capturas das telas para documentação', async ({ page, request, browser }
   }
   const att = await attCtx.newPage()
   await att.goto('/attendant')
-  await att.getByLabel('Escolha seu guichê').selectOption({ label: 'Guichê 1' })
+  // seleciona pelo valor (id): o rótulo pode vir com " — ocupado por …" após a spec principal
+  await att.getByLabel('Escolha seu guichê').selectOption(String(guiche.id))
   await att.getByRole('button', { name: 'Entrar no guichê' }).click()
   await att.getByRole('button', { name: 'CHAMAR PRÓXIMO' }).click()
   await expect(att.locator('.code-xl')).not.toHaveText('—')
