@@ -87,10 +87,16 @@ test('capturas das telas para documentação', async ({ page, request, browser }
   }
   const att = await attCtx.newPage()
   await att.goto('/attendant')
-  // seleciona pelo valor (id): o rótulo pode vir com " — ocupado por …" após a spec principal
-  await att.getByLabel('Escolha seu guichê').selectOption(String(guiche.id))
-  await att.getByRole('button', { name: 'Entrar no guichê' }).click()
-  await att.getByRole('button', { name: 'CHAMAR PRÓXIMO' }).click()
+  // a atendente pode seguir no guichê da spec principal (claim persiste no backend):
+  // nesse caso a tela abre direto no painel do guichê, sem o select
+  const callBtn = att.getByRole('button', { name: 'CHAMAR PRÓXIMO' })
+  const sel = att.getByLabel('Escolha seu guichê')
+  await expect(sel.or(callBtn)).toBeVisible({ timeout: 30_000 })
+  if (await sel.isVisible()) {
+    await sel.selectOption(String(guiche.id))
+    await att.getByRole('button', { name: 'Entrar no guichê' }).click()
+  }
+  await callBtn.click()
   await expect(att.locator('.code-xl')).not.toHaveText('—')
   await att.getByRole('button', { name: 'INICIAR ATENDIMENTO' }).click()
   await expect(att.getByText('EM ATENDIMENTO')).toBeVisible()
