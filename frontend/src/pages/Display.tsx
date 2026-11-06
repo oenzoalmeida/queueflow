@@ -85,6 +85,8 @@ export default function Display() {
             )}
             <span
               className={`ws-dot ${connected ? 'on' : ''}`}
+              role="status"
+              aria-label={connected ? 'Tempo real ativo' : 'Reconectando ao tempo real'}
               title={connected ? 'Tempo real ativo' : 'Reconectando…'}
             />
           </span>

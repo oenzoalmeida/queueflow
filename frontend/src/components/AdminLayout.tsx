@@ -22,10 +22,10 @@ export default function AdminLayout() {
 
   return (
     <div className="admin-shell">
-      <button className="hamburger" onClick={() => setOpen(!open)} aria-label="Menu">
+      <button className="hamburger" onClick={() => setOpen(!open)} aria-label="Menu" aria-expanded={open} aria-controls="admin-sidebar">
         {open ? <X size={22} /> : <Menu size={22} />}
       </button>
-      <aside className={`sidebar ${open ? 'open' : ''}`}>
+      <aside id="admin-sidebar" className={`sidebar ${open ? 'open' : ''}`}>
         <div className="brand">
           <ListOrdered size={20} /> QueueFlow
         </div>

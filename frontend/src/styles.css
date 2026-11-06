@@ -10,6 +10,7 @@
   --green: #16a34a;
   --amber: #d97706;
   --radius: 10px;
+  --focus-ring: #bfdbfe;
   --shadow: 0 1px 3px rgba(22, 35, 59, 0.08);
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
@@ -43,7 +44,14 @@ input, select {
   border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px;
   font-size: 15px; background: #fff; color: var(--text); width: 100%;
 }
-input:focus, select:focus { outline: 2px solid #bfdbfe; border-color: var(--primary); }
+input:focus, select:focus { outline: 2px solid var(--focus-ring); border-color: var(--primary); }
+
+/* focus ring consistente para navegação por teclado (só :focus-visible, sem poluir o clique) */
+.btn:focus-visible, .totem-card:focus-visible, .sound-btn:focus-visible,
+.side-link:focus-visible, .hamburger:focus-visible, a:focus-visible {
+  outline: 2px solid var(--focus-ring); outline-offset: 2px;
+}
+.side-link:focus-visible, .sound-btn:focus-visible { outline-color: #93c5fd; }
 label { font-size: 13px; font-weight: 600; color: var(--muted); display: block; margin: 10px 0 4px; }
 .checkbox { display: inline-flex; align-items: center; gap: 6px; margin: 0; }
 .checkbox input { width: auto; }
