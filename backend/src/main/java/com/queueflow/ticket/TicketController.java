@@ -53,7 +53,7 @@ public class TicketController {
     }
 
     @PostMapping("/{id}/cancel")
-    public TicketDTO cancel(@PathVariable long id) {
-        return service.cancel(id);
+    public TicketDTO cancel(@PathVariable long id, @AuthenticationPrincipal AuthUser user) {
+        return service.cancel(id, user == null ? null : user.id());
     }
 }

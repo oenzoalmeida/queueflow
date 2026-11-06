@@ -1,6 +1,7 @@
 package com.queueflow.ticket;
 
 import com.queueflow.common.ApiException;
+import com.queueflow.common.BusinessClock;
 import com.queueflow.counter.Counter;
 import com.queueflow.counter.CounterRepository;
 import com.queueflow.event.TicketEvent;
@@ -24,7 +25,6 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class TicketService {
-    private static final ZoneId ZONE = ZoneId.systemDefault();
     private static final List<Ticket.Status> ACTIVE = List.of(Ticket.Status.CALLED, Ticket.Status.IN_SERVICE);
 
     private final TicketRepository tickets;
@@ -36,6 +36,7 @@ public class TicketService {
     private final TicketEventRepository events;
     private final PrioritySettingsRepository settings;
     private final WsPublisher ws;
+    private final BusinessClock clock;
 
     public record AuthContext(Long userId, Long counterId) {}
 
@@ -49,7 +50,7 @@ public class TicketService {
         Queue queue = queues.findById(queueId).orElseThrow(() -> new ApiException.NotFound("Fila não encontrada."));
         if (!queue.isActive()) throw new ApiException.Rule("Fila indisponível.");
 
-        LocalDate day = LocalDate.now(ZONE);
+        LocalDate day = clock.today();
         int number;
         String code;
         if (type == Ticket.PriorityType.PRIORITY) {
@@ -189,12 +190,13 @@ public class TicketService {
     }
 
     @Transactional
-    public TicketDTO cancel(long id) {
+    public TicketDTO cancel(long id, Long actorUserId) {
         Ticket t = byId(id);
         if (t.getStatus() == Ticket.Status.FINISHED || t.getStatus() == Ticket.Status.CANCELLED)
             throw new ApiException.Rule("Não é possível cancelar uma senha %s.".formatted(t.getStatus()));
         t.setStatus(Ticket.Status.CANCELLED);
-        saveEvent(t, TicketEvent.Type.CANCELLED, null, null);
+        User actor = actorUserId == null ? null : users.findById(actorUserId).orElse(null);
+        saveEvent(t, TicketEvent.Type.CANCELLED, actor, t.getCounter());
         ws.display("TICKET_CANCELLED", Map.of("ticket", toDTO(t)));
         return toDTO(t);
     }
@@ -260,12 +262,12 @@ public class TicketService {
     }
 
     private boolean isToday(Ticket t) {
-        return t.getCalledAt() != null && t.getCalledAt().atZone(ZONE).toLocalDate().equals(LocalDate.now(ZONE));
+        return t.getCalledAt() != null && t.getCalledAt().atZone(clock.zone()).toLocalDate().equals(clock.today());
     }
 
     private record Range(Instant from, Instant to) {}
     private Range todayRange() {
-        LocalDate d = LocalDate.now(ZONE);
-        return new Range(d.atStartOfDay(ZONE).toInstant(), d.plusDays(1).atStartOfDay(ZONE).toInstant());
+        LocalDate d = clock.today();
+        return new Range(d.atStartOfDay(clock.zone()).toInstant(), d.plusDays(1).atStartOfDay(clock.zone()).toInstant());
     }
 }

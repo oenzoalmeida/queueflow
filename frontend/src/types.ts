@@ -35,6 +35,7 @@ export interface UserDTO {
   email: string
   role: string
   active: boolean
+  mustChangePassword: boolean
   createdAt: string
 }
 

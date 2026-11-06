@@ -25,8 +25,9 @@ public class UserController {
                             @Email String email,
                             @Size(min = 12, max = 72) String password,
                             Boolean active) {}
-    public record UserDTO(Long id, String name, String email, String role, boolean active, Instant createdAt) {
-        static UserDTO of(User u) { return new UserDTO(u.getId(), u.getName(), u.getEmail(), u.getRole().name(), u.isActive(), u.getCreatedAt()); }
+    public record UserDTO(Long id, String name, String email, String role, boolean active,
+                          boolean mustChangePassword, Instant createdAt) {
+        static UserDTO of(User u) { return new UserDTO(u.getId(), u.getName(), u.getEmail(), u.getRole().name(), u.isActive(), u.isMustChangePassword(), u.getCreatedAt()); }
     }
 
     @GetMapping
@@ -36,10 +37,11 @@ public class UserController {
     public UserDTO create(@Valid @RequestBody CreateReq req) {
         if (users.existsByEmailIgnoreCase(req.email().trim()))
             throw new ApiException(HttpStatus.CONFLICT, "Email já cadastrado.");
+        // senha definida pelo admin é provisória: troca obrigatória no primeiro acesso
         return UserDTO.of(users.save(User.builder()
                 .name(req.name().trim()).email(req.email().trim())
                 .passwordHash(encoder.encode(req.password()))
-                .role(User.Role.ATTENDANT).active(true).createdAt(Instant.now()).build()));
+                .role(User.Role.ATTENDANT).active(true).mustChangePassword(true).createdAt(Instant.now()).build()));
     }
 
     @PutMapping("/{id}")

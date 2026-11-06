@@ -1,5 +1,7 @@
 package com.queueflow.history;
 
+import com.queueflow.common.ApiException;
+import com.queueflow.common.BusinessClock;
 import com.queueflow.ticket.*;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +26,7 @@ public class HistoryController {
 
     private final TicketRepository tickets;
     private final TicketService ticketService;
+    private final BusinessClock clock;
 
     public record Row(TicketDTO ticket, Double waitMinutes, Double serviceMinutes, Double totalMinutes) {}
 
@@ -36,8 +40,11 @@ public class HistoryController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        LocalDate day = date != null ? date : LocalDate.now(ZoneId.systemDefault());
-        ZoneId zone = ZoneId.systemDefault();
+        if (page < 0) throw new ApiException(HttpStatus.BAD_REQUEST, "Página inválida.");
+        if (size < 1 || size > 200) throw new ApiException(HttpStatus.BAD_REQUEST, "Tamanho de página inválido (1 a 200).");
+
+        LocalDate day = date != null ? date : clock.today();
+        ZoneId zone = clock.zone();
         Instant from = day.atStartOfDay(zone).toInstant();
         Instant to = day.plusDays(1).atStartOfDay(zone).toInstant();
 
@@ -51,7 +58,7 @@ public class HistoryController {
             return cb.and(ps.toArray(new Predicate[0]));
         };
 
-        return tickets.findAll(spec, PageRequest.of(page, Math.min(size, 200), Sort.by(Sort.Direction.DESC, "createdAt")))
+        return tickets.findAll(spec, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")))
                 .map(t -> new Row(ticketService.toDTO(t), minutes(t.getCreatedAt(), t.getCalledAt()),
                         minutes(t.getServiceStartedAt(), t.getFinishedAt()), minutes(t.getCreatedAt(), t.getFinishedAt())));
     }

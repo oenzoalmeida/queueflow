@@ -53,21 +53,29 @@ public class AuthController {
             @NotBlank(message = "Informe a senha atual") String currentPassword,
             @NotBlank @Size(min = 12, max = 72, message = "A nova senha deve ter entre 12 e 72 caracteres") String newPassword) {}
 
+    /**
+     * Cadastro público existe apenas para o bootstrap: o PRIMEIRO usuário do
+     * sistema (que vira ADMIN). Com qualquer usuário já cadastrado, o endpoint
+     * fecha — antes qualquer visitante criava uma conta de atendente e operava
+     * a fila (chamar/finalizar senhas). Novos usuários são criados por um
+     * administrador em /api/users, com troca de senha obrigatória no 1º acesso.
+     */
     @PostMapping("/register")
     @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<LoginResp> register(@jakarta.validation.Valid @RequestBody RegisterReq req) {
-        if (users.existsByEmailIgnoreCase(req.email().trim())) throw new ApiException(HttpStatus.CONFLICT, "Email já cadastrado.");
         users.lockUserProvisioning(); // serializa a checagem de primeiro usuário
-        boolean firstUser = users.count() == 0;
+        if (users.count() > 0)
+            throw new ApiException(HttpStatus.FORBIDDEN,
+                    "Cadastro público indisponível. Novos usuários são criados por um administrador.");
         User user = User.builder()
                 .name(req.name().trim())
                 .email(req.email().trim())
                 .passwordHash(encoder.encode(req.password()))
-                .role(firstUser ? User.Role.ADMIN : User.Role.ATTENDANT)
+                .role(User.Role.ADMIN)
                 .active(true)
                 .createdAt(Instant.now())
                 .build();
-        if (firstUser && establishments.count() == 0) {
+        if (establishments.count() == 0) {
             establishments.save(com.queueflow.establishment.Establishment.builder()
                     .name("Estabelecimento Principal").createdAt(Instant.now()).build());
         }
