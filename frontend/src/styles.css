@@ -201,7 +201,7 @@ tr:hover td { background: #f8fafd; }
 .legal-card h2 { color: var(--primary-dark); font-size: 1.05rem; margin-top: 24px; }
 .legal-card p { line-height: 1.6; }
 .legal-links { margin-top: 28px; text-align: center; }
-.login-legal { margin-top: 16px; font-size: 0.85rem; }
+.login-card .login-legal { margin-top: 16px; font-size: 0.85rem; }
 .login-legal a { color: var(--primary-dark); }
 
 .admin-main h1 { font-size: 1.5em; }
