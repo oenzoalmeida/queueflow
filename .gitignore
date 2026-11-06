@@ -40,3 +40,7 @@ Thumbs.db
 backend/src/main/resources/application-local.yml
 application-local.yml
 !*.example
+
+# Playwright
+frontend/test-results/
+frontend/playwright-report/
