@@ -12,7 +12,7 @@ const ADMIN = { name: 'Admin E2E', email: 'admin-e2e@test.io', password: 'SenhaA
 const DIR = '../docs/screenshots'
 
 test('capturas das telas para documentação', async ({ page, request, browser }) => {
-  test.setTimeout(180_000)
+  test.setTimeout(300_000) // CI e mais lenta que o ambiente local
   // bootstrap idempotente: se o admin já existe (spec principal rodou antes), só faz login
   const reg = await request.post(`${API}/auth/register`, {
     data: { name: ADMIN.name, email: ADMIN.email, password: ADMIN.password },
