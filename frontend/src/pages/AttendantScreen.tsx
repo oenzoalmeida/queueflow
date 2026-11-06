@@ -119,7 +119,7 @@ export default function AttendantScreen() {
       {!claimedId ? (
         <section className="card narrow center">
           <h3>Selecione seu guichê</h3>
-          <select value={counterId ?? ''} onChange={(e) => setCounterId(Number(e.target.value))} className="big-select">
+          <select aria-label="Escolha seu guichê" value={counterId ?? ''} onChange={(e) => setCounterId(Number(e.target.value))} className="big-select">
             <option value="" disabled>Escolher…</option>
             {counters.filter((c) => c.active).map((c) => (
               <option key={c.id} value={c.id}>

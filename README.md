@@ -18,7 +18,13 @@ O acesso administrativo é provisionado internamente via bootstrap do backend (v
 
 | Login | Atendimento | Display público |
 |---|---|---|
-| ![Tela de login](docs/screenshots/login.png) | ![Tela do atendente com senha chamada](docs/screenshots/atendimento.png) | ![Display de chamadas](docs/screenshots/display.png) |
+| ![Tela de login](docs/screenshots/login.png) | ![Tela do atendente com senha em atendimento](docs/screenshots/atendimento.png) | ![Display de chamadas](docs/screenshots/display.png) |
+
+| Dashboard administrativo | Totem de senhas | Senha emitida |
+|---|---|---|
+| ![Dashboard com indicadores operacionais](docs/screenshots/02-dashboard.png) | ![Totem de emissão de senhas](docs/screenshots/03-totem.png) | ![Senha emitida no totem](docs/screenshots/04-totem-senha.png) |
+
+As capturas são reais, geradas pela suíte E2E em navegador (`frontend/e2e/screenshots.spec.ts`, ver [docs/e2e.md](docs/e2e.md)).
 
 ## Sobre o projeto
 
