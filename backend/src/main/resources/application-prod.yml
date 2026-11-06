@@ -1,5 +1,5 @@
 # Production profile — activated via SPRING_PROFILES_ACTIVE=prod
-# Database credentials are injected by Render from the managed PostgreSQL instance.
+# Database credentials are injected via App Service environment variables (Aiven managed PostgreSQL).
 spring:
   datasource:
     url: jdbc:postgresql://${SPRING_DATASOURCE_HOST}:${SPRING_DATASOURCE_PORT}/${SPRING_DATASOURCE_DATABASE}

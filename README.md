@@ -71,9 +71,7 @@ queueflow/
 ├── backend/          API Spring Boot (REST + WebSocket)
 ├── frontend/         Aplicação React + TypeScript (Vite)
 ├── docker-compose.yml
-├── Dockerfile
-├── netlify.toml
-└── DEPLOY.md
+└── Dockerfile
 ```
 
 ## Como executar
@@ -102,7 +100,7 @@ SPRING_PROFILES_ACTIVE=local ./mvnw spring-boot:run
 cd ../frontend && npm install && npm run dev
 ```
 
-Configuração atual de hospedagem na seção [Deploy](#deploy). O arquivo [`DEPLOY.md`](DEPLOY.md) registra o ambiente antigo no Render.
+Configuração atual de hospedagem na seção [Deploy](#deploy).
 
 ## Variáveis de ambiente
 
@@ -141,7 +139,7 @@ Backend (produção): `https://queueflow-backend-oe.azurewebsites.net` (Azure Ap
 
 Banco de dados: PostgreSQL gerenciado no Aiven (preservado na migração Render → Azure).
 
-O arquivo [`DEPLOY.md`](DEPLOY.md) preserva as instruções do ambiente anterior no Render. O antigo `render.yaml` foi removido da árvore atual e pode ser consultado no histórico do Git. O plano de Cloud Run em `docs/cloudrun-deploy.md` também é histórico e não descreve a hospedagem atual.
+As instruções do ambiente anterior no Render/Netlify (`DEPLOY.md`, `render.yaml`, `netlify.toml`, `frontend/vercel.json`) foram removidas da árvore atual e podem ser consultadas no histórico do Git. O plano de Cloud Run em `docs/cloudrun-deploy.md` também é histórico e não descreve a hospedagem atual.
 
 ## Status
 

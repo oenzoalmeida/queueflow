@@ -32,8 +32,6 @@ logs/
 .DS_Store
 Thumbs.db
 
-# Local Netlify folder
-.netlify
 .claude/
 
 # Local Spring profile (não versionado)
