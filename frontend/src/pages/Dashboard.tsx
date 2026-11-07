@@ -3,6 +3,7 @@ import { api } from '../api/client'
 import { subscribe } from '../ws'
 import type { TicketDTO } from '../types'
 import { usePageTitle } from '../usePageTitle'
+import { DashboardSkeleton } from '../components/Skeleton'
 
 interface DashboardData {
   issuedToday: number
@@ -39,7 +40,7 @@ export default function Dashboard() {
   }, [])
 
   if (error) return <div className="alert error">{error}</div>
-  if (!data) return <div className="loading">Carregando…</div>
+  if (!data) return (<><h1>Dashboard</h1><DashboardSkeleton /></>)
 
   const maxHour = Math.max(1, ...data.byHour.map((h) => h.count))
 

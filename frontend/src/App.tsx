@@ -14,11 +14,12 @@ import Display from './pages/Display'
 import Termos from './pages/Termos'
 import Privacidade from './pages/Privacidade'
 import AdminLayout from './components/AdminLayout'
+import { PageSkeleton } from './components/Skeleton'
 import NotFound from './pages/NotFound'
 
 function RequireRole({ role, children }: { role: 'ADMIN' | 'ATTENDANT' | 'ANY'; children: React.ReactNode }) {
   const { user, loading } = useAuth()
-  if (loading) return <div className="page-loading">Carregando…</div>
+  if (loading) return <PageSkeleton />
   if (!user) return <Navigate to="/login" replace />
   if (user.mustChangePassword) return <Navigate to="/trocar-senha" replace />
   if (role === 'ADMIN' && user.role !== 'ADMIN') return <Navigate to="/attendant" replace />
@@ -29,7 +30,7 @@ export default function App() {
   const { user, loading } = useAuth()
   return (
     <Routes>
-      <Route path="/" element={loading ? <div className="page-loading">Carregando…</div> : <Navigate to={user?.role === 'ATTENDANT' ? '/attendant' : user ? '/dashboard' : '/login'} replace />} />
+      <Route path="/" element={loading ? <PageSkeleton /> : <Navigate to={user?.role === 'ATTENDANT' ? '/attendant' : user ? '/dashboard' : '/login'} replace />} />
       <Route path="/login" element={<Login />} />
       <Route path="/trocar-senha" element={<ChangePassword />} />
 

@@ -274,3 +274,13 @@ th { letter-spacing: 0.05em; }
   *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
   .btn:active:not(:disabled), .totem-card:hover, .totem-card:active, .side-link:active, .sound-btn:active { transform: none; }
 }
+
+/* ---------- skeleton loading (telas esqueleto) ----------
+   Blocos cinza no formato do layout substituem spinner/texto em carregamentos
+   de página inteira. A regra global de prefers-reduced-motion (acima) já
+   desliga a animação de pulso para quem prefere movimento reduzido. */
+.skeleton { display: block; border-radius: 8px; background: var(--line); animation: qf-skeleton-pulse 1.5s ease-in-out infinite; }
+@keyframes qf-skeleton-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.page-skeleton { padding: 24px; max-width: 900px; margin: 0 auto; width: 100%; }
+.totem-card.skeleton-card { cursor: default; pointer-events: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
