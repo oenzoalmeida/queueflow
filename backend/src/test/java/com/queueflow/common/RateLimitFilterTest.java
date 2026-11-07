@@ -108,24 +108,26 @@ class RateLimitFilterTest {
     }
 
     @Test
-    void publicPeerCannotSpoofForwardedHeaders() throws Exception {
-        // Conexão direta de IP público: XFF e X-Real-IP são ignorados, vale o remoteAddr.
-        String attacker = "198.51.100.5";
-        assertEquals(200, post("/api/auth/login", attacker, "1.1.1.1", "1.1.1.1").getStatus());
-        assertEquals(200, post("/api/auth/login", attacker, "2.2.2.2", "2.2.2.2").getStatus());
-        assertEquals(200, post("/api/auth/login", attacker, "3.3.3.3", "3.3.3.3").getStatus());
-        assertEquals(429, post("/api/auth/login", attacker, "4.4.4.4", "4.4.4.4").getStatus());
+    void lastXffEntryWinsRegardlessOfPeerAddress() throws Exception {
+        // O proxy da plataforma sempre anexa o IP real por último — independente do
+        // endereço do peer visto pela app, o bucket é o último item do XFF.
+        String peer = "198.51.100.5";
+        assertEquals(200, post("/api/auth/login", peer, "1.1.1.1, 203.0.113.30", null).getStatus());
+        assertEquals(200, post("/api/auth/login", peer, "2.2.2.2, 203.0.113.30", null).getStatus());
+        assertEquals(200, post("/api/auth/login", peer, "3.3.3.3, 203.0.113.30", null).getStatus());
+        assertEquals(429, post("/api/auth/login", peer, "4.4.4.4, 203.0.113.30", null).getStatus());
     }
 
     @Test
-    void xRealIpHonoredOnlyBehindTrustedProxy() throws Exception {
-        String proxy = "10.0.0.9";
+    void xRealIpUsedOnlyWhenNoXff() throws Exception {
         for (int i = 0; i < 3; i++) {
-            assertEquals(200, post("/api/auth/login", proxy, null, "203.0.113.20").getStatus());
+            assertEquals(200, post("/api/auth/login", "10.0.0.9", null, "203.0.113.20").getStatus());
         }
-        assertEquals(429, post("/api/auth/login", proxy, null, "203.0.113.20").getStatus());
+        assertEquals(429, post("/api/auth/login", "10.0.0.9", null, "203.0.113.20").getStatus());
         // cliente real diferente atrás do mesmo proxy tem cota própria
-        assertEquals(200, post("/api/auth/login", proxy, null, "203.0.113.21").getStatus());
+        assertEquals(200, post("/api/auth/login", "10.0.0.9", null, "203.0.113.21").getStatus());
+        // XFF presente tem prioridade sobre X-Real-IP
+        assertEquals(200, post("/api/auth/login", "10.0.0.9", "203.0.113.22", "203.0.113.20").getStatus());
     }
 
     @Test
