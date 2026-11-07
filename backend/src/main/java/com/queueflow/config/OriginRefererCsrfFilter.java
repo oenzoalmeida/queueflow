@@ -61,18 +61,32 @@ public class OriginRefererCsrfFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        String origin = normalizeHeaderOrigin(request.getHeader("Origin"));
-        if (origin != null && allowedOrigins.contains(origin)) {
-            filterChain.doFilter(request, response);
+        String rawOrigin = request.getHeader("Origin");
+        if (rawOrigin != null && !rawOrigin.isBlank()) {
+            // Navegadores sempre enviam Origin em mutações cross-site: valor
+            // presente precisa estar na allowlist ("null" nunca é permitido).
+            String origin = normalizeHeaderOrigin(rawOrigin);
+            if (origin != null && allowedOrigins.contains(origin)) {
+                filterChain.doFilter(request, response);
+            } else {
+                reject(response);
+            }
             return;
         }
-        if (origin == null) {
-            String refererOrigin = originOf(request.getHeader("Referer"));
-            if (refererOrigin != null && allowedOrigins.contains(refererOrigin)) {
+        String refererOrigin = originOf(request.getHeader("Referer"));
+        if (refererOrigin != null) {
+            if (allowedOrigins.contains(refererOrigin)) {
                 filterChain.doFilter(request, response);
-                return;
+            } else {
+                reject(response);
             }
+            return;
         }
+        // Sem Origin nem Referer: cliente fora do navegador (curl, testes, e2e).
+        filterChain.doFilter(request, response);
+    }
+
+    private static void reject(HttpServletResponse response) throws IOException {
         response.setStatus(HttpStatus.FORBIDDEN.value());
         response.setContentType("application/json;charset=" + StandardCharsets.UTF_8);
         response.getWriter().write("{\"status\":403,\"message\":\"Origem da requisição não permitida.\"}");
