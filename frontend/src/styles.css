@@ -284,3 +284,61 @@ th { letter-spacing: 0.05em; }
 .page-skeleton { padding: 24px; max-width: 900px; margin: 0 auto; width: 100%; }
 .totem-card.skeleton-card { cursor: default; pointer-events: none; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* ==================== PROPOSTA A: "PAINEL DE AEROPORTO" ====================
+   Identidade escura estilo painel de embarque: âmbar sobre grafite,
+   Oswald condensada para títulos, JetBrains Mono para senhas/códigos. */
+:root {
+  --primary: #f5a400;
+  --primary-dark: #d18f00;
+  --green: #2fbf71;
+  --focus-ring: #ffc94d;
+}
+.mono { font-family: 'JetBrains Mono', Consolas, monospace; }
+
+/* ----- totem ----- */
+.totem-page { background: radial-gradient(1200px 700px at 50% -10%, #1a232c, #101418); color: #edeff1; }
+.totem-title { font-family: Oswald, 'Segoe UI', sans-serif; text-transform: uppercase; letter-spacing: 0.05em; color: #ffffff; }
+.totem-card { background: #181f27; border-color: #39434d; border-radius: 14px; }
+.totem-card:hover { border-color: var(--primary); }
+.totem-card.choice.selected { border-color: var(--primary); background: #1f2833; box-shadow: 0 0 0 4px rgba(245, 164, 0, 0.18); }
+.totem-card.choice.priority.selected { border-color: #ff7a59; background: #2a2018; box-shadow: 0 0 0 4px rgba(255, 122, 89, 0.2); }
+.totem-prefix { font-family: 'JetBrains Mono', Consolas, monospace; color: var(--primary); font-size: 34px; }
+.totem-card.priority .totem-prefix { color: #ff7a59; }
+.totem-name { color: #edeff1; }
+.totem-code { font-family: 'JetBrains Mono', Consolas, monospace; color: var(--primary); text-shadow: 0 0 26px rgba(245, 164, 0, 0.35); }
+.totem-ahead { color: #ffffff; }
+.totem-eta { color: #9aa7b2; }
+.totem-page .muted { color: #9aa7b2; }
+.totem-page .btn.ghost { color: #edeff1; border-color: #39434d; background: transparent; }
+.totem-page .btn.ghost:hover:not(:disabled) { background: #1f2833; }
+.totem-page .btn.primary { background: var(--primary); border-color: var(--primary); color: #171100; }
+.totem-page .btn.primary:hover:not(:disabled) { background: var(--primary-dark); }
+.totem-page .alert.error { background: #402626; color: #ffb4ab; }
+.totem-page .alert.error .btn.ghost { color: #ffb4ab; border-color: #6b3a3a; }
+
+/* ----- login ----- */
+.login-page { background: linear-gradient(160deg, #101418, #1a232c 60%, #101418); }
+.login-card { background: #181f27; border: 1px solid #2a343e; border-radius: 16px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5); }
+.login-card h1 { font-family: Oswald, 'Segoe UI', sans-serif; text-transform: uppercase; letter-spacing: 0.08em; color: var(--primary); }
+.login-card p, .login-card .muted { color: #9aa7b2; }
+.login-card label { color: #9aa7b2; }
+.login-card input { background: #10161c; border-color: #39434d; color: #edeff1; }
+.login-card .btn.primary { background: var(--primary); border-color: var(--primary); color: #171100; }
+.login-card .btn.primary:hover:not(:disabled) { background: var(--primary-dark); }
+.login-card .login-legal a, .login-legal a { color: #ffc94d; }
+.login-card .alert.error { background: #402626; color: #ffb4ab; }
+
+/* ----- display (TV) ----- */
+.display-page { background: #0c0f12; }
+.brand-mini { font-family: Oswald, 'Segoe UI', sans-serif; text-transform: uppercase; letter-spacing: 0.18em; color: var(--primary); }
+.display-code { font-family: 'JetBrains Mono', Consolas, monospace; color: var(--primary); text-shadow: 0 0 34px rgba(245, 164, 0, 0.4); }
+.display-counter { font-family: Oswald, 'Segoe UI', sans-serif; color: #ffffff; letter-spacing: 0.12em; }
+.display-history h3 { font-family: Oswald, 'Segoe UI', sans-serif; color: #7c8791; }
+.display-history li .mono { color: var(--primary); font-family: 'JetBrains Mono', Consolas, monospace; }
+.display-hist-counter { color: #8b96a0; }
+.display-idle p { color: #7c8791; }
+.ws-status { color: rgba(255, 255, 255, 0.65); }
+.sound-btn { border-color: rgba(245, 164, 0, 0.45); color: #ffd97a; background: rgba(245, 164, 0, 0.08); }
+.sound-btn:hover { background: rgba(245, 164, 0, 0.18); }
+.ws-dot.on { background: var(--green); box-shadow: 0 0 10px var(--green); }
