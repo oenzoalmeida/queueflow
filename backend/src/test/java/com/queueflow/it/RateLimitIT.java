@@ -38,4 +38,21 @@ class RateLimitIT {
         assertNotNull(limited.getHeaders().getFirst(HttpHeaders.RETRY_AFTER));
         assertTrue(System.currentTimeMillis() - t0 < 5_000, "client must not wait for Retry-After");
     }
+
+    @Test
+    void spoofedFirstXffEntriesStayInTheSameBucket() {
+        // O TestRestTemplate conecta de 127.0.0.1 (proxy confiável): o filtro deve olhar o
+        // ÚLTIMO item do XFF. Variar os itens anteriores não pode zerar a cota do atacante.
+        HttpHeaders h = new HttpHeaders();
+        h.setContentType(MediaType.APPLICATION_JSON);
+        var body = Map.of("email", "nobody@test.io", "password", "wrong");
+        for (int i = 1; i <= 3; i++) {
+            h.set("X-Forwarded-For", "10.1.2." + i + ", 203.0.113.88");
+            var r = rest.exchange("/api/auth/login", HttpMethod.POST, new HttpEntity<>(body, h), String.class);
+            assertEquals(HttpStatus.UNAUTHORIZED, r.getStatusCode());
+        }
+        h.set("X-Forwarded-For", "10.9.9.9, 203.0.113.88");
+        var limited = rest.exchange("/api/auth/login", HttpMethod.POST, new HttpEntity<>(body, h), String.class);
+        assertEquals(HttpStatus.TOO_MANY_REQUESTS, limited.getStatusCode());
+    }
 }
