@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, Printer } from 'lucide-react'
 import { api } from '../api/client'
 import { usePageTitle } from '../usePageTitle'
+import { TotemSkeleton } from '../components/Skeleton'
 
 interface PubQueue { id: number; name: string; prefix: string }
 interface Issued {
@@ -68,7 +69,7 @@ export default function Totem() {
           <h1 className="totem-title">Como podemos ajudar?</h1>
           {error && <div role="alert" className="alert error">{error} <button type="button" className="btn ghost" onClick={() => void load()}>Tentar novamente</button></div>}
           {!queues ? (
-            error ? null : <p role="status" className="empty">Carregando opções de atendimento…</p>
+            error ? null : <TotemSkeleton />
           ) : queues.length === 0 ? (
             <p className="empty">Nenhuma fila disponível no momento.</p>
           ) : (
