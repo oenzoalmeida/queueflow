@@ -66,6 +66,10 @@ public class SecurityConfig {
                                  "/api/dashboard/**", "/api/settings/**", "/api/counters/**")
                     .hasRole("ADMIN")
                 .requestMatchers("/api/tickets/**").hasAnyRole("ADMIN", "ATTENDANT")
+                // Interface web (arquivos estaticos e rotas do React) servida pelo proprio backend.
+                .requestMatchers(request -> "GET".equals(request.getMethod())
+                        && !request.getRequestURI().startsWith("/api/"))
+                    .permitAll()
                 .anyRequest().authenticated())
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

@@ -22,7 +22,8 @@ app:
     expiration-ms: 86400000
   auth:
     cookie-secure: true
-    cookie-same-site: None
+    # Interface e API na mesma origem (cookie first-party, funciona no Safari).
+    cookie-same-site: Lax
   cors:
     allowed-origins: ${FRONTEND_URL:http://localhost:5173}
 

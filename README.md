@@ -6,9 +6,9 @@ O projeto separa frontend e backend (React/TypeScript na interface e API Java/Sp
 
 ## Demonstração
 
-**Frontend (produção):** https://oenzoa-queueflow.web.app
+**Aplicação (produção):** https://queueflow-backend-oe.azurewebsites.net
 
-> O link acima abre o frontend. A API é utilizada pela interface e roda separadamente no Azure App Service. Os dados da demonstração podem ser redefinidos.
+> O endereço antigo (oenzoa-queueflow.web.app) redireciona para o acima. A interface e a API rodam juntas no Azure App Service, na mesma origem. Os dados da demonstração podem ser redefinidos.
 
 **Conta demo (atendente):** `demo@queueflow.app` / `Demo@2026`
 
@@ -123,7 +123,7 @@ Senhas armazenadas apenas como hash. A conta administrativa é provisionada inte
 
 Totem e display são públicos por design e não coletam dados pessoais dos clientes atendidos.
 
-Páginas de [Termos de Uso](https://oenzoa-queueflow.web.app/termos) e [Política de Privacidade](https://oenzoa-queueflow.web.app/privacidade) disponíveis no rodapé do login.
+Páginas de [Termos de Uso](https://queueflow-backend-oe.azurewebsites.net/termos) e [Política de Privacidade](https://queueflow-backend-oe.azurewebsites.net/privacidade) disponíveis no rodapé do login.
 
 ## Testes
 
@@ -133,9 +133,9 @@ Frontend: testes automatizados com Vitest + Testing Library (`npm test` em `fron
 
 ## Deploy
 
-Frontend (produção): https://oenzoa-queueflow.web.app (Firebase Hosting, deploy via GitHub Actions).
+Interface e API (produção): `https://queueflow-backend-oe.azurewebsites.net` (a interface React é compilada na imagem Docker e servida pelo Spring Boot, mesma origem da API; cookie de sessão `HttpOnly; Secure; SameSite=Lax`, que funciona no Safari). O Firebase Hosting (`oenzoa-queueflow.web.app`) só redireciona (301) para o endereço acima.
 
-Backend (produção): `https://queueflow-backend-oe.azurewebsites.net` (Azure App Service B1, container GHCR, Always On + WebSockets).
+Hospedagem: Azure App Service B1, container GHCR, Always On + WebSockets.
 
 Banco de dados: PostgreSQL gerenciado no Aiven (preservado na migração Render → Azure).
 
