@@ -135,7 +135,7 @@ Frontend: testes automatizados com Vitest + Testing Library (`npm test` em `fron
 
 Interface e API (produção): `https://queueflow-backend-oe.azurewebsites.net` (a interface React é compilada na imagem Docker e servida pelo Spring Boot, mesma origem da API; cookie de sessão `HttpOnly; Secure; SameSite=Lax`, que funciona no Safari). O Firebase Hosting (`oenzoa-queueflow.web.app`) só redireciona (301) para o endereço acima.
 
-Hospedagem: Azure App Service B1, container GHCR, Always On + WebSockets).
+Hospedagem: Azure App Service B1, container GHCR, Always On + WebSockets.
 
 Banco de dados: PostgreSQL gerenciado no Aiven (preservado na migração Render → Azure).
 
