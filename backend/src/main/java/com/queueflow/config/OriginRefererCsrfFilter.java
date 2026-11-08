@@ -66,7 +66,7 @@ public class OriginRefererCsrfFilter extends OncePerRequestFilter {
             // Navegadores sempre enviam Origin em mutações cross-site: valor
             // presente precisa estar na allowlist ("null" nunca é permitido).
             String origin = normalizeHeaderOrigin(rawOrigin);
-            if (origin != null && allowedOrigins.contains(origin)) {
+            if (origin != null && isAllowed(origin, request)) {
                 filterChain.doFilter(request, response);
             } else {
                 reject(response);
@@ -75,7 +75,7 @@ public class OriginRefererCsrfFilter extends OncePerRequestFilter {
         }
         String refererOrigin = originOf(request.getHeader("Referer"));
         if (refererOrigin != null) {
-            if (allowedOrigins.contains(refererOrigin)) {
+            if (isAllowed(refererOrigin, request)) {
                 filterChain.doFilter(request, response);
             } else {
                 reject(response);
@@ -84,6 +84,22 @@ public class OriginRefererCsrfFilter extends OncePerRequestFilter {
         }
         // Sem Origin nem Referer: cliente fora do navegador (curl, testes, e2e).
         filterChain.doFilter(request, response);
+    }
+
+    /**
+     * Origem permitida: a lista configurada ou a propria origem do servidor
+     * (interface servida pelo mesmo host da API, cookie first-party).
+     */
+    private boolean isAllowed(String origin, HttpServletRequest request) {
+        if (allowedOrigins.contains(origin)) {
+            return true;
+        }
+        String host = request.getHeader("Host");
+        if (host == null || host.isBlank()) {
+            return false;
+        }
+        String h = host.trim().toLowerCase();
+        return origin.equals("https://" + h) || origin.equals("http://" + h);
     }
 
     private static void reject(HttpServletResponse response) throws IOException {
