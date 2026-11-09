@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { useAuth } from '../auth'
 import { usePageTitle } from '../usePageTitle'
+import PasswordField from '../components/PasswordField'
 
 export default function Login() {
   usePageTitle('Entrar')
@@ -35,6 +36,17 @@ export default function Login() {
           <span className="login-brand-ticket" aria-hidden="true">A012</span>
           <h1>QueueFlow</h1>
           <p className="login-brand-tag">Gerenciamento de filas e senhas</p>
+          <div className="login-ticket" aria-hidden="true">
+            <div className="login-ticket-top">
+              <span>SUA SENHA</span>
+              <strong>A012</strong>
+            </div>
+            <div className="login-ticket-tear" />
+            <div className="login-ticket-bottom">
+              <span>Guichê 03</span>
+              <span className="login-ticket-barcode" />
+            </div>
+          </div>
           <ul className="login-brand-list">
             <li><strong>Senhas em segundos</strong><span>Totem simples para o cliente</span></li>
             <li><strong>Painel em tempo real</strong><span>Chamadas ao vivo na TV</span></li>
@@ -48,7 +60,7 @@ export default function Login() {
           <label htmlFor="login-email">Email</label>
           <input id="login-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@empresa.com" required autoFocus />
           <label htmlFor="login-password">Senha</label>
-          <input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
+          <PasswordField id="login-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
           <button className="btn primary" disabled={loading}>
             {loading ? 'Entrando…' : 'Entrar'}
           </button>

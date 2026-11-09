@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { useAuth } from '../auth'
 import { usePageTitle } from '../usePageTitle'
+import PasswordField from '../components/PasswordField'
 
 export default function ChangePassword() {
   const { user, changePassword, logout } = useAuth()
@@ -41,11 +42,11 @@ export default function ChangePassword() {
         <p className="muted">Troca de senha obrigatória no primeiro acesso</p>
         {error && <div className="alert error">{error}</div>}
         <label htmlFor="cp-current">Senha temporária</label>
-        <input id="cp-current" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required autoFocus />
+        <PasswordField id="cp-current" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required autoFocus />
         <label htmlFor="cp-new">Nova senha</label>
-        <input id="cp-new" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} minLength={12} maxLength={72} required />
+        <PasswordField id="cp-new" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} minLength={12} maxLength={72} required />
         <label htmlFor="cp-confirm">Confirmar nova senha</label>
-        <input id="cp-confirm" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
+        <PasswordField id="cp-confirm" value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
         <button className="btn primary" disabled={loading}>
           {loading ? 'Salvando…' : 'Definir nova senha'}
         </button>
