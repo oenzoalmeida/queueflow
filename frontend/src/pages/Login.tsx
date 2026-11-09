@@ -30,21 +30,33 @@ export default function Login() {
 
   return (
     <div className="login-page">
-      <form className="login-card" onSubmit={submit}>
-        <h1>QueueFlow</h1>
-        <p className="muted">Gerenciamento de filas e senhas</p>
-        {error && <div className="alert error">{error}</div>}
-        <label htmlFor="login-email">Email</label>
-        <input id="login-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@empresa.com" required autoFocus />
-        <label htmlFor="login-password">Senha</label>
-        <input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
-        <button className="btn primary" disabled={loading}>
-          {loading ? 'Entrando…' : 'Entrar'}
-        </button>
-        <p className="login-legal muted">
-          <a href="/termos">Termos de Uso</a> · <a href="/privacidade">Política de Privacidade</a>
-        </p>
-      </form>
+      <div className="login-shell">
+        <aside className="login-brand">
+          <span className="login-brand-ticket" aria-hidden="true">A012</span>
+          <h1>QueueFlow</h1>
+          <p className="login-brand-tag">Gerenciamento de filas e senhas</p>
+          <ul className="login-brand-list">
+            <li><strong>Senhas em segundos</strong><span>Totem simples para o cliente</span></li>
+            <li><strong>Painel em tempo real</strong><span>Chamadas ao vivo na TV</span></li>
+            <li><strong>Prioridade respeitada</strong><span>Atendimento justo para todos</span></li>
+          </ul>
+        </aside>
+        <form className="login-card" onSubmit={submit}>
+          <h2>Entrar na conta</h2>
+          <p className="muted">Acesse o painel do seu estabelecimento</p>
+          {error && <div className="alert error">{error}</div>}
+          <label htmlFor="login-email">Email</label>
+          <input id="login-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@empresa.com" required autoFocus />
+          <label htmlFor="login-password">Senha</label>
+          <input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
+          <button className="btn primary" disabled={loading}>
+            {loading ? 'Entrando…' : 'Entrar'}
+          </button>
+          <p className="login-legal muted">
+            <a href="/termos">Termos de Uso</a> · <a href="/privacidade">Política de Privacidade</a>
+          </p>
+        </form>
+      </div>
     </div>
   )
 }
