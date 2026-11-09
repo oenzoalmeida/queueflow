@@ -47,7 +47,7 @@ test('totem emite, atendente chama e display atualiza em tempo real', async ({ p
   await page.goto('/login')
   await expect(page).toHaveTitle('Entrar · QueueFlow')
   await page.getByLabel(/e-?mail/i).fill(ADMIN.email)
-  await page.getByLabel(/senha/i).fill(ADMIN.password)
+  await page.getByLabel('Senha', { exact: true }).fill(ADMIN.password)
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(page).toHaveTitle('Dashboard · QueueFlow')
   await expect(page.getByText('Senhas hoje')).toBeVisible()

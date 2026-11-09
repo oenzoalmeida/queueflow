@@ -52,7 +52,7 @@ test('capturas das telas para documentação', async ({ page, request, browser }
   await page.screenshot({ path: `${DIR}/login.png` })
 
   await page.getByLabel(/e-?mail/i).fill(ADMIN.email)
-  await page.getByLabel(/senha/i).fill(ADMIN.password)
+  await page.getByLabel('Senha', { exact: true }).fill(ADMIN.password)
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(page).toHaveTitle('Dashboard · QueueFlow')
   await page.getByText('Senhas hoje').waitFor()
