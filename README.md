@@ -66,6 +66,18 @@ Estrutura preparada para execução com Docker.
 
 ## Arquitetura / Estrutura
 
+Visão simplificada dos componentes em produção (React e API são servidos na mesma origem):
+
+```mermaid
+flowchart LR
+  U[Atendente / administrador] --> WEB[Interface React]
+  T[Totem público] --> WEB
+  WEB --> API[Spring Boot REST / WebSocket]
+  API --> DB[(PostgreSQL / Aiven)]
+  API --> WS[Atualizações STOMP]
+  WS --> D[Display e telas de atendimento]
+```
+
 ```text
 queueflow/
 ├── backend/          API Spring Boot (REST + WebSocket)
