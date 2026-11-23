@@ -62,9 +62,21 @@ Estrutura preparada para execução com Docker.
 
 **Backend:** Java 21, Spring Boot 4, Spring Web, Spring Data JPA, Spring Security, Spring WebSocket, JWT, Flyway, PostgreSQL.
 
-**Infraestrutura:** Docker, Docker Compose, Azure App Service (backend), Firebase Hosting (frontend), PostgreSQL gerenciado (Aiven).
+**Infraestrutura atual:** Docker, Docker Compose, Azure App Service (interface React e API Spring Boot servidas na mesma origem), PostgreSQL gerenciado (Aiven). O Firebase Hosting permanece apenas como redirecionamento legado para o endereço atual.
 
 ## Arquitetura / Estrutura
+
+Visão simplificada dos componentes em produção (React e API são servidos na mesma origem):
+
+```mermaid
+flowchart LR
+  U[Atendente / administrador] --> WEB[Interface React]
+  T[Totem público] --> WEB
+  WEB --> API[Spring Boot REST / WebSocket]
+  API --> DB[(PostgreSQL / Aiven)]
+  API --> WS[Atualizações STOMP]
+  WS --> D[Display e telas de atendimento]
+```
 
 ```text
 queueflow/
