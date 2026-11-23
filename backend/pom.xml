@@ -114,6 +114,10 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+          <!-- A suíte de integração atual compartilha um banco de teste entre classes.
+               FlowIT deve criar os dados iniciais antes de WebSocketIT reutilizá-los.
+               Esta ordenação é uma medida de compatibilidade até os testes serem isolados. -->
+          <runOrder>alphabetical</runOrder>
           <includes>
             <include>**/*Test.java</include>
             <include>**/*IT.java</include>
