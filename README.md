@@ -10,7 +10,7 @@ A interface é desenvolvida em React e TypeScript. A API usa Java, Spring Boot e
 
 > O endereço antigo (oenzoa-queueflow.web.app) redireciona para o acima. A interface e a API rodam juntas no Azure App Service, na mesma origem. Os dados da demonstração podem ser redefinidos.
 
-**Conta demo (atendente):** `demo@queueflow.app` / `Demo@2026`
+**Acesso de demonstração (atendente):** `demo@queueflow.app` / `Demo@2026`
 
 O acesso administrativo é provisionado internamente via bootstrap do backend (variáveis `QUEUEFLOW_BOOTSTRAP_*`) e não possui credencial pública.
 
