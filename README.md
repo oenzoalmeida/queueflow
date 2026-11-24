@@ -1,8 +1,8 @@
 # QueueFlow
 
-Sistema full stack para gerenciamento de filas de atendimento em tempo real: senhas, guichês e o andamento da fila atualizados instantaneamente via WebSocket, com painel administrativo, tela operacional de atendimento e rotas públicas de totem e display.
+O QueueFlow organiza o atendimento por senhas e guichês. Atendentes chamam as próximas senhas em um painel, enquanto totens e displays públicos recebem as mudanças em tempo real pelo WebSocket.
 
-O projeto separa frontend e backend (React/TypeScript na interface e API Java/Spring Boot com PostgreSQL), com autenticação JWT e autorização por papel.
+A interface é desenvolvida em React e TypeScript. A API usa Java, Spring Boot e PostgreSQL, com autenticação JWT e permissões por perfil.
 
 ## Demonstração
 
@@ -10,7 +10,7 @@ O projeto separa frontend e backend (React/TypeScript na interface e API Java/Sp
 
 > O endereço antigo (oenzoa-queueflow.web.app) redireciona para o acima. A interface e a API rodam juntas no Azure App Service, na mesma origem. Os dados da demonstração podem ser redefinidos.
 
-**Conta demo (atendente):** `demo@queueflow.app` / `Demo@2026`
+**Acesso de demonstração (atendente):** `demo@queueflow.app` / `Demo@2026`
 
 O acesso administrativo é provisionado internamente via bootstrap do backend (variáveis `QUEUEFLOW_BOOTSTRAP_*`) e não possui credencial pública.
 
@@ -28,7 +28,7 @@ As capturas são reais, geradas pela suíte E2E em navegador (`frontend/e2e/scre
 
 ## Sobre o projeto
 
-O QueueFlow foi desenvolvido para organizar o fluxo de atendimento de estabelecimentos, permitindo controlar senhas, guichês e o andamento da fila por meio de uma aplicação web, com atualização em tempo real entre as telas.
+O sistema mantém a emissão de senhas, os guichês e as chamadas sincronizados. O totem permite retirar uma senha; o atendente controla a chamada e o display mostra as informações ao público.
 
 ## Perfis de acesso
 
