@@ -2,13 +2,13 @@
 
 Sistema full stack para gerenciamento de filas de atendimento em tempo real: senhas, guichês e o andamento da fila atualizados instantaneamente via WebSocket, com painel administrativo, tela operacional de atendimento e rotas públicas de totem e display.
 
-O projeto separa frontend e backend (React/TypeScript na interface e API Java/Spring Boot com PostgreSQL), com autenticação JWT e autorização por papel.
+O projeto separa frontend e backend (React/TypeScript na interface e API Java/Spring Boot com PostgreSQL), com autenticação JWT e autorização por perfil.
 
 ## Demonstração
 
 **Aplicação (produção):** https://queueflow-backend-oe.azurewebsites.net
 
-> O endereço antigo (oenzoa-queueflow.web.app) redireciona para o acima. A interface e a API rodam juntas no Azure App Service, na mesma origem. Os dados da demonstração podem ser redefinidos.
+> O endereço antigo (oenzoa-queueflow.web.app) redireciona para o endereço acima. A interface e a API rodam juntas no Azure App Service, na mesma origem. Os dados da demonstração podem ser redefinidos.
 
 **Conta demo (atendente):** `demo@queueflow.app` / `Demo@2026`
 
